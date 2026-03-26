@@ -60,32 +60,28 @@
         }
 
         .logo-mark {
-            width: 34px;
-            height: 34px;
-            background: linear-gradient(135deg, var(--accent), #16a34a);
-            border-radius: 8px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 13px;
-            color: #fff;
-            flex-shrink: 0;
+            flex-direction: column;
+            gap: 0;
         }
 
         .header-title {
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+            line-height: 1.1;
         }
-        .header-title .x {
+        .header-subtitle {
+            font-size: 10px;
+            font-weight: 500;
             color: var(--text-muted);
-            font-weight: 400;
-            margin: 0 6px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
-        .header-title .jobber {
+        .header-subtitle .jobber {
             color: var(--jobber);
-            font-weight: 700;
+            font-weight: 600;
         }
 
         .header-right {
@@ -570,9 +566,9 @@
 <!-- ── Header ── -->
 <header class="header">
     <div class="header-left">
-        <div class="logo-mark">A</div>
-        <div class="header-title">
-            AGM Pro Tools <span class="x">x</span> <span class="jobber">Jobber</span>
+        <div class="logo-mark">
+            <div class="header-title">AGM Pro Tools</div>
+            <div class="header-subtitle">Powered by <span class="jobber">Jobber</span></div>
         </div>
     </div>
     <div class="header-right">
