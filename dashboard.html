@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGM Pro Tools x Jobber — Texas Turf Company Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0f1a;
+            --bg-card: #111827;
+            --bg-card-hover: #1a2332;
+            --accent: #22c55e;
+            --accent-dim: rgba(34, 197, 94, 0.15);
+            --accent-glow: rgba(34, 197, 94, 0.3);
+            --jobber: #7c3aed;
+            --jobber-dim: rgba(124, 58, 237, 0.15);
+            --jobber-glow: rgba(124, 58, 237, 0.25);
+            --blue: #3b82f6;
+            --blue-dim: rgba(59, 130, 246, 0.15);
+            --warning: #f59e0b;
+            --warning-dim: rgba(245, 158, 11, 0.15);
+            --danger: #ef4444;
+            --danger-dim: rgba(239, 68, 68, 0.15);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(255,255,255,0.06);
+            --border-subtle: rgba(255,255,255,0.03);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 32px;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-mark {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, var(--accent), #16a34a);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 13px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        .header-title .x {
+            color: var(--text-muted);
+            font-weight: 400;
+            margin: 0 6px;
+        }
+        .header-title .jobber {
+            color: var(--jobber);
+            font-weight: 700;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .client-name {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+            50% { box-shadow: 0 0 0 5px transparent; }
+        }
+
+        /* ── Main Grid ── */
+        .main {
+            flex: 1;
+            padding: 20px 32px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* ── Row 1: Metrics ── */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            flex-shrink: 0;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .metric-card:hover { border-color: rgba(255,255,255,0.1); }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+        .metric-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent), transparent); }
+        .metric-card:nth-child(2)::before { background: linear-gradient(90deg, var(--jobber), transparent); }
+        .metric-card:nth-child(3)::before { background: linear-gradient(90deg, var(--blue), transparent); }
+        .metric-card:nth-child(4)::before { background: linear-gradient(90deg, var(--warning), transparent); }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+        .metric-card:nth-child(1) .metric-value { color: var(--accent); }
+        .metric-card:nth-child(2) .metric-value { color: var(--jobber); }
+        .metric-card:nth-child(3) .metric-value { color: var(--blue); }
+        .metric-card:nth-child(4) .metric-value { color: var(--warning); }
+
+        .metric-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── Row 2: Feed + Pipeline ── */
+        .middle-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px 10px;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .card-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .card-badge.live {
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+
+        /* ── Event Feed ── */
+        .feed-container {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            padding: 0 18px;
+        }
+        .feed-container::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, var(--bg-card));
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .feed-track {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            animation: feed-scroll 30s linear infinite;
+        }
+
+        @keyframes feed-scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+        .feed-container:hover .feed-track {
+            animation-play-state: paused;
+        }
+
+        .feed-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: var(--border-subtle);
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .feed-item:hover { background: rgba(255,255,255,0.04); }
+
+        .feed-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+        .feed-dot.green { background: var(--accent); box-shadow: 0 0 6px var(--accent-glow); }
+        .feed-dot.blue { background: var(--blue); box-shadow: 0 0 6px rgba(59,130,246,0.3); }
+        .feed-dot.purple { background: var(--jobber); box-shadow: 0 0 6px var(--jobber-glow); }
+        .feed-dot.amber { background: var(--warning); box-shadow: 0 0 6px rgba(245,158,11,0.3); }
+        .feed-dot.red { background: var(--danger); box-shadow: 0 0 6px rgba(239,68,68,0.3); }
+
+        .feed-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            flex: 1;
+        }
+        .feed-text strong { color: var(--text-primary); font-weight: 600; }
+        .feed-text .amount { color: var(--accent); font-weight: 700; }
+
+        .feed-time {
+            font-size: 10px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        /* highlighted row */
+        .feed-item.highlight {
+            background: var(--accent-dim);
+            border: 1px solid rgba(34, 197, 94, 0.12);
+        }
+
+        /* ── Pipeline ── */
+        .pipeline-body {
+            flex: 1;
+            padding: 4px 18px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .pipeline-stage {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 0;
+            position: relative;
+        }
+        .pipeline-stage:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 36px;
+            bottom: -10px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .pipeline-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .pipeline-info {
+            flex: 1;
+        }
+
+        .pipeline-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .pipeline-count {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            font-variant-numeric: tabular-nums;
+        }
+        .pipeline-count.active {
+            animation: soft-pulse 3s ease-in-out infinite;
+        }
+        @keyframes soft-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .pipeline-bar-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        .pipeline-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 1.5s ease;
+        }
+
+        /* ── Row 3: Bottom cards ── */
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+
+        .bottom-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 18px;
+        }
+
+        .bottom-card-title {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+        }
+
+        /* Self-healing */
+        .health-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+        }
+        .health-row:not(:last-child) {
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .health-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .health-value {
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .health-value.ok { color: var(--accent); }
+
+        .health-check {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        /* Response time */
+        .response-hero {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .response-hero .big {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+        .response-hero .label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+        }
+        .stat-row:not(:last-child) {
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+        .stat-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        /* Automation coverage */
+        .auto-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+        .auto-item:not(:last-child) {
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .auto-check {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            background: var(--accent-dim);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .auto-arrow {
+            color: var(--text-muted);
+            margin: 0 1px;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            padding: 10px 32px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        .footer a:hover { color: var(--accent); }
+
+        /* ── Utility ── */
+        .text-accent { color: var(--accent); }
+        .text-jobber { color: var(--jobber); }
+        .text-muted { color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+    <div class="header-left">
+        <div class="logo-mark">A</div>
+        <div class="header-title">
+            AGM Pro Tools <span class="x">x</span> <span class="jobber">Jobber</span>
+        </div>
+    </div>
+    <div class="header-right">
+        <span class="client-name">Texas Turf Company &mdash; Live Integration</span>
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            Connected
+        </div>
+    </div>
+</header>
+
+<main class="main">
+
+    <!-- ── Row 1: Metrics ── -->
+    <div class="metrics-row">
+        <div class="metric-card">
+            <div class="metric-label">Events Synced</div>
+            <div class="metric-value" data-target="4218">0</div>
+            <div class="metric-sub">Webhook events processed</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Quotes Tracked</div>
+            <div class="metric-value" data-target="3744">0</div>
+            <div class="metric-sub">From Jobber into pipeline</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Auto Follow-ups Sent</div>
+            <div class="metric-value" data-target="1890">0</div>
+            <div class="metric-sub">50.5% of quotes</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Reviews Requested</div>
+            <div class="metric-value" data-target="720">0</div>
+            <div class="metric-sub">39.9% of completed jobs</div>
+        </div>
+    </div>
+
+    <!-- ── Row 2: Feed + Pipeline ── -->
+    <div class="middle-row">
+
+        <!-- Event Feed -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Live Event Feed</span>
+                <span class="card-badge live">Live</span>
+            </div>
+            <div class="feed-container">
+                <div class="feed-track" id="feedTrack">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Pipeline -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">AGM Pipeline</span>
+                <span class="card-badge live">Synced</span>
+            </div>
+            <div class="pipeline-body" id="pipelineBody">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── Row 3: Bottom cards ── -->
+    <div class="bottom-row">
+
+        <!-- Self-Healing -->
+        <div class="bottom-card">
+            <div class="bottom-card-title">Self-Healing Status</div>
+            <div class="health-row">
+                <span class="health-label">Layer 1: Retry Queue</span>
+                <span class="health-value ok"><span class="health-check"></span> 0 pending</span>
+            </div>
+            <div class="health-row">
+                <span class="health-label">Layer 2: Error Classification</span>
+                <span class="health-value ok"><span class="health-check"></span> Last error: 3d ago</span>
+            </div>
+            <div class="health-row">
+                <span class="health-label">Layer 3: Slack Escalation</span>
+                <span class="health-value ok"><span class="health-check"></span> 0 unresolved</span>
+            </div>
+            <div class="health-row">
+                <span class="health-label">Layer 4: AI Diagnosis</span>
+                <span class="health-value ok"><span class="health-check"></span> Active</span>
+            </div>
+        </div>
+
+        <!-- Response Time -->
+        <div class="bottom-card">
+            <div class="bottom-card-title">Response Time</div>
+            <div class="response-hero">
+                <div class="big">&lt; 2 min</div>
+                <div class="label">Avg Speed-to-Lead</div>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Quote follow-up rate</span>
+                <span class="stat-value">94%</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Review request rate</span>
+                <span class="stat-value">89%</span>
+            </div>
+        </div>
+
+        <!-- Automation Coverage -->
+        <div class="bottom-card">
+            <div class="bottom-card-title">Automation Coverage</div>
+            <div class="auto-item">
+                <span class="auto-check">&#10003;</span>
+                Lead capture <span class="auto-arrow">&rarr;</span> Jobber client creation
+            </div>
+            <div class="auto-item">
+                <span class="auto-check">&#10003;</span>
+                Quote sent <span class="auto-arrow">&rarr;</span> Pipeline update + follow-up
+            </div>
+            <div class="auto-item">
+                <span class="auto-check">&#10003;</span>
+                Quote approved <span class="auto-arrow">&rarr;</span> Won stage + line items
+            </div>
+            <div class="auto-item">
+                <span class="auto-check">&#10003;</span>
+                Job complete <span class="auto-arrow">&rarr;</span> Review request
+            </div>
+            <div class="auto-item">
+                <span class="auto-check">&#10003;</span>
+                No response <span class="auto-arrow">&rarr;</span> Escalation to rep
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+    Powered by <a href="https://agmprotools.com" target="_blank">AGM Pro Tools</a> &mdash; agmprotools.com
+</footer>
+
+<script>
+(function() {
+    'use strict';
+
+    /* ── Animate counters ── */
+    function animateCounters() {
+        document.querySelectorAll('.metric-value[data-target]').forEach(el => {
+            const target = parseInt(el.dataset.target, 10);
+            const duration = 1800;
+            const start = performance.now();
+            function tick(now) {
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(target * eased).toLocaleString();
+                if (progress < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        });
+    }
+
+    /* ── Event Feed ── */
+    const feedEvents = [
+        { color: 'green',  text: '<strong>Quote #Q-4821</strong> created &mdash; synced to pipeline', time: '11s ago' },
+        { color: 'blue',   text: '<strong>Quote #Q-4819</strong> sent to Bobby Martinez &mdash; follow-up scheduled', time: '1m ago' },
+        { color: 'green',  text: '<strong>Quote #Q-4815</strong> approved &mdash; <span class="amount">$12,400</span> &mdash; moved to Won', time: '4m ago', highlight: true },
+        { color: 'amber',  text: '<strong>Quote #Q-4812</strong> &mdash; 48hr follow-up sent automatically', time: '12m ago' },
+        { color: 'purple', text: '<strong>Job #J-2104</strong> completed &mdash; review request sent', time: '18m ago' },
+        { color: 'red',    text: '<strong>Quote #Q-4808</strong> &mdash; no response after 7 days &mdash; escalated to rep', time: '25m ago' },
+        { color: 'green',  text: '<strong>Quote #Q-4805</strong> created &mdash; synced to pipeline', time: '32m ago' },
+        { color: 'blue',   text: '<strong>Quote #Q-4803</strong> sent to Maria Gonzalez &mdash; follow-up scheduled', time: '41m ago' },
+        { color: 'green',  text: '<strong>Quote #Q-4799</strong> approved &mdash; <span class="amount">$8,750</span> &mdash; moved to Won', time: '55m ago', highlight: true },
+        { color: 'purple', text: '<strong>Job #J-2101</strong> completed &mdash; review request sent', time: '1h ago' },
+        { color: 'amber',  text: '<strong>Quote #Q-4796</strong> &mdash; 48hr follow-up sent automatically', time: '1h ago' },
+        { color: 'green',  text: '<strong>Quote #Q-4793</strong> created &mdash; synced to pipeline', time: '1h ago' },
+        { color: 'blue',   text: '<strong>Quote #Q-4790</strong> sent to David Chen &mdash; follow-up scheduled', time: '2h ago' },
+        { color: 'red',    text: '<strong>Quote #Q-4787</strong> &mdash; no response after 7 days &mdash; escalated to rep', time: '2h ago' },
+        { color: 'green',  text: '<strong>Quote #Q-4784</strong> approved &mdash; <span class="amount">$15,200</span> &mdash; moved to Won', time: '3h ago', highlight: true },
+        { color: 'purple', text: '<strong>Job #J-2098</strong> completed &mdash; review request sent', time: '3h ago' },
+        { color: 'amber',  text: '<strong>Quote #Q-4781</strong> &mdash; 24hr follow-up sent automatically', time: '3h ago' },
+        { color: 'blue',   text: '<strong>Quote #Q-4778</strong> sent to Sarah Williams &mdash; follow-up scheduled', time: '4h ago' },
+    ];
+
+    function buildFeed() {
+        const track = document.getElementById('feedTrack');
+        // Duplicate events for seamless loop
+        const all = [...feedEvents, ...feedEvents];
+        track.innerHTML = all.map(ev => `
+            <div class="feed-item${ev.highlight ? ' highlight' : ''}">
+                <span class="feed-dot ${ev.color}"></span>
+                <span class="feed-text">${ev.text}</span>
+                <span class="feed-time">${ev.time}</span>
+            </div>
+        `).join('');
+    }
+
+    /* ── Pipeline ── */
+    const stages = [
+        { name: 'New Lead',    count: 47,    color: 'var(--blue)',    bg: 'var(--blue-dim)',    pct: 100, active: true },
+        { name: 'Quote Sent',  count: 23,    color: 'var(--jobber)',  bg: 'var(--jobber-dim)',  pct: 49,  active: true },
+        { name: 'Follow-Up',   count: 12,    color: 'var(--warning)', bg: 'var(--warning-dim)', pct: 26,  active: true },
+        { name: 'Closed Won',  count: 1803,  color: 'var(--accent)',  bg: 'var(--accent-dim)',  pct: 59,  active: false, big: true },
+        { name: 'Closed Lost', count: 1241,  color: 'var(--text-muted)', bg: 'rgba(100,116,139,0.1)', pct: 41, active: false, muted: true },
+    ];
+
+    function buildPipeline() {
+        const body = document.getElementById('pipelineBody');
+        body.innerHTML = stages.map(s => `
+            <div class="pipeline-stage">
+                <div class="pipeline-icon" style="background:${s.bg}; color:${s.color};">
+                    ${s.big ? '&#9733;' : s.muted ? '&mdash;' : '&#9679;'}
+                </div>
+                <div class="pipeline-info" style="flex:1;">
+                    <div class="pipeline-name">${s.name}</div>
+                    <div class="pipeline-count ${s.active ? 'active' : ''}" style="color:${s.color};" data-pipeline-target="${s.count}">0</div>
+                    <div class="pipeline-bar-track">
+                        <div class="pipeline-bar-fill" style="background:${s.color}; width:0%;" data-bar-target="${s.pct}"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function animatePipeline() {
+        document.querySelectorAll('[data-pipeline-target]').forEach(el => {
+            const target = parseInt(el.dataset.pipelineTarget, 10);
+            const duration = 2000;
+            const start = performance.now();
+            function tick(now) {
+                const elapsed = now - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                el.textContent = Math.round(target * eased).toLocaleString();
+                if (progress < 1) requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        });
+
+        // Animate bars
+        setTimeout(() => {
+            document.querySelectorAll('[data-bar-target]').forEach(el => {
+                el.style.width = el.dataset.barTarget + '%';
+            });
+        }, 200);
+    }
+
+    /* ── Init ── */
+    buildFeed();
+    buildPipeline();
+    requestAnimationFrame(() => {
+        animateCounters();
+        animatePipeline();
+    });
+})();
+</script>
+
+</body>
+</html>
