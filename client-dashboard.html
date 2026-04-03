@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Texas Turf Company — Client Dashboard</title>
+<title>Client Dashboard — AGM Pro Tools</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -325,7 +325,7 @@
   <div class="card">
     <div class="card-head">
       <span class="card-title">Product Mix</span>
-      <span class="badge info">Turf Types</span>
+      <span class="badge info" id="productLabel">Products</span>
     </div>
     <div class="product-body" id="productBody">
       <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
@@ -342,10 +342,15 @@
 (function() {
   'use strict';
 
-  // ── Configuration ──
+  // ── Configuration — SWAP THESE PER CLIENT ──
   const CLIENT_SLUG = 'texas-turf';
   const CLIENT_NAME = 'Texas Turf Company';
-  const CLIENT_TZ = 'America/Chicago'; // Client's local timezone (CST/CDT)
+  const CLIENT_TZ = 'America/Chicago';
+  const PRODUCT_LABEL = 'Turf Types';       // "Service Types", "Product Categories", etc.
+  const PRODUCT_UNIT = 'Sq Ft';             // "Units", "Hours", "Sq Ft", etc.
+  const PRODUCT_EMPTY_MSG = 'No product data yet. Data populates when quotes are approved.';
+
+  // ── Shared endpoints — same for all clients ──
   const HEALTH_URL = 'https://agm-pro--agm-health-health.modal.run';
   const PIPELINE_URL = 'https://agm-pro--agm-health-pipeline-data.modal.run';
   const METRICS_URL = 'https://agm-pro--agm-health-jobber-metrics.modal.run';
@@ -504,9 +509,9 @@
   function updateSyncTime(source) {
     const el = document.getElementById('lastSync');
     const now = new Date();
-    const opts = { timeZone: CLIENT_TZ, month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' };
+    const opts = { timeZone: CLIENT_TZ, month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
     const formatted = now.toLocaleString('en-US', opts);
-    el.textContent = formatted + ' CT' + (source === 'static' ? ' (cached)' : '');
+    el.textContent = formatted + (source === 'static' ? ' (cached)' : '');
   }
 
   // ── Build pipeline — rich visual format ──
@@ -595,7 +600,7 @@
     const body = document.getElementById('productBody');
 
     if (!products || products.length === 0) {
-      body.innerHTML = '<div class="product-empty">No turf product data yet.<br>Data populates when quotes are approved with turf type fields.</div>';
+      body.innerHTML = '<div class="product-empty">' + PRODUCT_EMPTY_MSG + '</div>';
       return;
     }
 
@@ -605,7 +610,7 @@
     const maxVal = Math.max(...products.map(p => p.value), 1);
     const barColors = ['#3b82f6', '#7c3aed', '#06b6d4', '#22c55e', '#f59e0b', '#ef4444', '#818cf8', '#fb923c'];
 
-    let html = '<div class="product-row product-header"><div>Product</div><div>Volume</div><div style="text-align:right">Sq Ft</div><div style="text-align:right">Revenue</div></div>';
+    let html = '<div class="product-row product-header"><div>Product</div><div>Volume</div><div style="text-align:right">' + PRODUCT_UNIT + '</div><div style="text-align:right">Revenue</div></div>';
     products.forEach((p, i) => {
       const pct = maxVal > 0 ? (p.value / maxVal * 100) : 0;
       const color = barColors[i % barColors.length];
@@ -773,6 +778,8 @@
   // ── Init ──
   async function init() {
     document.getElementById('clientName').textContent = CLIENT_NAME;
+    document.getElementById('productLabel').textContent = PRODUCT_LABEL;
+    document.title = CLIENT_NAME + ' \u2014 Client Dashboard';
 
     // Fetch all data sources in parallel
     const [health, pipelineData, metrics] = await Promise.all([
