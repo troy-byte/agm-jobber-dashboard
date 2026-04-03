@@ -175,5 +175,42 @@
     "quote_rate": 45.3,
     "win_rate": 41.7
   },
-  "product_mix": []
+  "product_mix": [
+    {
+      "name": "Saratoga 60 (with install)",
+      "count": 3,
+      "sqft": 4200,
+      "value": 18600
+    },
+    {
+      "name": "Kent 44 (with install)",
+      "count": 2,
+      "sqft": 2800,
+      "value": 11200
+    },
+    {
+      "name": "TexasLush (with installation)",
+      "count": 2,
+      "sqft": 1600,
+      "value": 8400
+    },
+    {
+      "name": "Saratoga 40 (with install)",
+      "count": 1,
+      "sqft": 950,
+      "value": 3800
+    },
+    {
+      "name": "Royal 40 (with install)",
+      "count": 1,
+      "sqft": 1100,
+      "value": 4200
+    },
+    {
+      "name": "TexasPutt (with install)",
+      "count": 1,
+      "sqft": 680,
+      "value": 3400
+    }
+  ]
 }
