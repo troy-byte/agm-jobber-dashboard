@@ -348,6 +348,7 @@
   const CLIENT_TZ = 'America/Chicago'; // Client's local timezone (CST/CDT)
   const HEALTH_URL = 'https://agm-pro--agm-health-health.modal.run';
   const PIPELINE_URL = 'https://agm-pro--agm-health-pipeline-data.modal.run';
+  const METRICS_URL = 'https://agm-pro--agm-health-jobber-metrics.modal.run';
 
   // Pipeline stages with visual config — icons, colors, labels, context
   const PIPELINE_STAGES = [
@@ -377,6 +378,31 @@
       console.error('Health fetch failed:', e);
       return null;
     }
+  }
+
+  // ── Fetch real metrics from event store ──
+  async function fetchMetrics() {
+    try {
+      const resp = await fetch(METRICS_URL + '?client=' + CLIENT_SLUG + '&_=' + Date.now());
+      if (!resp.ok) throw new Error('Metrics ' + resp.status);
+      return await resp.json();
+    } catch (e) {
+      console.warn('Metrics fetch failed:', e);
+      return null;
+    }
+  }
+
+  function applyMetrics(m) {
+    if (!m) return;
+    animateCounter('mEventsSynced', m.events_synced || 0);
+    animateCounter('mQuotesTracked', m.quotes_tracked || 0);
+    animateCounter('mFollowUps', m.follow_ups_sent || 0);
+    animateCounter('mReviews', m.reviews_requested || 0);
+
+    // Update percentage subtexts
+    const quotePct = m.events_synced > 0 ? (m.quotes_tracked / m.events_synced * 100).toFixed(1) : '0';
+    document.getElementById('mFollowUpsSub').textContent = (m.events_synced > 0 ? ((m.follow_ups_sent / m.quotes_tracked) * 100).toFixed(1) : '0') + '% of quotes';
+    document.getElementById('mReviewsSub').textContent = (m.jobs_closed > 0 ? ((m.reviews_requested / m.jobs_closed) * 100).toFixed(1) : '0') + '% of completed jobs';
   }
 
   // ── Fetch pipeline data ──
@@ -435,32 +461,7 @@
       Object.keys(pData.stages).forEach(k => { result[k] = pData.stages[k]; });
     }
 
-    // Calculate metrics from pipeline data
-    const totalOpps = pData.total_opportunities || 0;
-    const quoteSent = pData.stages && pData.stages.quote_sent ? pData.stages.quote_sent.count : 0;
-    const quoteApproved = pData.stages && pData.stages.quote_approved ? pData.stages.quote_approved.count : 0;
-    const jobComplete = pData.stages && pData.stages.job_complete ? pData.stages.job_complete.count : 0;
-
-    // Events Synced — use provided value or estimate from total opps (each opp = ~4 webhook events avg)
-    const eventsSynced = pData.events_synced || (totalOpps * 4);
-    animateCounter('mEventsSynced', eventsSynced);
-
-    // Quotes Tracked — opportunities that reached quote_sent or beyond
-    const quotesTracked = pData.quotes_tracked || (quoteSent + quoteApproved + jobComplete + (pData.stages && pData.stages.negotiation ? pData.stages.negotiation.count : 0));
-    animateCounter('mQuotesTracked', quotesTracked);
-
-    // Auto Follow-Ups — estimate from quotes tracked
-    const followUps = pData.follow_ups_sent || Math.round(quotesTracked * 0.505);
-    animateCounter('mFollowUps', followUps);
-    const followUpPct = quotesTracked > 0 ? (followUps / quotesTracked * 100).toFixed(1) : '0';
-    document.getElementById('mFollowUpsSub').textContent = followUpPct + '% of quotes';
-
-    // Reviews Requested — from completed jobs
-    const reviews = pData.reviews_requested || Math.round(jobComplete * 0.399);
-    animateCounter('mReviews', reviews);
-    const reviewPct = jobComplete > 0 ? (reviews / jobComplete * 100).toFixed(1) : '0';
-    document.getElementById('mReviewsSub').textContent = reviewPct + '% of completed jobs';
-
+    // Metrics are now handled by fetchMetrics() from the dedicated endpoint
     return result;
   }
 
@@ -773,12 +774,17 @@
   async function init() {
     document.getElementById('clientName').textContent = CLIENT_NAME;
 
-    const health = await fetchHealth();
-    updateStatus(health);
+    // Fetch all data sources in parallel
+    const [health, pipelineData, metrics] = await Promise.all([
+      fetchHealth(),
+      fetchPipelineData(),
+      fetchMetrics(),
+    ]);
 
-    const pipelineData = await fetchPipelineData();
+    updateStatus(health);
     buildPipeline(pipelineData);
     buildActivityFeed(lastRecentActivity);
+    applyMetrics(metrics);
     initFeedScroll();
   }
 
@@ -786,11 +792,15 @@
 
   // Auto-refresh every 5 minutes
   setInterval(async () => {
-    const health = await fetchHealth();
+    const [health, pData, metrics] = await Promise.all([
+      fetchHealth(),
+      fetchPipelineData(getDateRange(activeRange)),
+      fetchMetrics(),
+    ]);
     updateStatus(health);
-    const pData = await fetchPipelineData(getDateRange(activeRange));
     buildPipeline(pData);
     buildActivityFeed(lastRecentActivity);
+    applyMetrics(metrics);
   }, 5 * 60 * 1000);
 
 })();
