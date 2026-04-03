@@ -1,1231 +1,823 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGM Pro Tools — Jobber Partnership</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #0a0f1a;
-            --bg-card: #111827;
-            --bg-card-hover: #1a2332;
-            --accent: #22c55e;
-            --accent-dim: rgba(34, 197, 94, 0.15);
-            --accent-glow: rgba(34, 197, 94, 0.3);
-            --jobber-blue: #7c3aed;
-            --jobber-blue-dim: rgba(124, 58, 237, 0.15);
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: rgba(255,255,255,0.06);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            overflow: hidden;
-            height: 100vh;
-        }
-
-        /* Navigation */
-        .nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 40px;
-            background: rgba(10, 15, 26, 0.9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-logo {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent), #16a34a);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 14px;
-        }
-
-        .nav-title {
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-        }
-
-        .nav-title span { color: var(--text-muted); font-weight: 400; }
-
-        .slide-counter {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-variant-numeric: tabular-nums;
-        }
-
-        .progress-bar {
-            position: fixed;
-            top: 57px;
-            left: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: width 0.4s ease;
-            z-index: 101;
-        }
-
-        /* Slide container */
-        .slides-container {
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 60px 40px;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-            pointer-events: none;
-        }
-
-        .slide.active {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: all;
-        }
-
-        .slide-inner {
-            max-width: 1200px;
-            width: 100%;
-        }
-
-        /* Typography */
-        .slide-label {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--accent);
-            margin-bottom: 16px;
-        }
-
-        .slide-label.purple { color: var(--jobber-blue); }
-
-        h1 {
-            font-size: 52px;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-            margin-bottom: 24px;
-        }
-
-        h1 .accent { color: var(--accent); }
-        h1 .purple { color: var(--jobber-blue); }
-
-        h2 {
-            font-size: 36px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            line-height: 1.2;
-            margin-bottom: 20px;
-        }
-
-        .subtitle {
-            font-size: 20px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-            max-width: 700px;
-            font-weight: 300;
-        }
-
-        /* Cards */
-        .card-grid {
-            display: grid;
-            gap: 16px;
-            margin-top: 32px;
-        }
-
-        .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
-        .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-        .card-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            transition: border-color 0.3s, background 0.3s;
-        }
-
-        .card:hover {
-            border-color: rgba(34, 197, 94, 0.2);
-            background: var(--bg-card-hover);
-        }
-
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            margin-bottom: 16px;
-        }
-
-        .card-icon.green { background: var(--accent-dim); }
-        .card-icon.purple { background: var(--jobber-blue-dim); }
-        .card-icon.amber { background: rgba(245, 158, 11, 0.15); }
-        .card-icon.red { background: rgba(239, 68, 68, 0.15); }
-
-        .card h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            letter-spacing: -0.01em;
-        }
-
-        .card p {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* Stats */
-        .stat-row {
-            display: flex;
-            gap: 40px;
-            margin-top: 32px;
-        }
-
-        .stat {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stat-value {
-            font-size: 42px;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            color: var(--accent);
-        }
-
-        .stat-value.purple { color: var(--jobber-blue); }
-
-        .stat-label {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
-        /* Flow diagram */
-        .flow {
-            display: flex;
-            align-items: center;
-            gap: 0;
-            margin-top: 32px;
-            flex-wrap: nowrap;
-        }
-
-        .flow-step {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px 24px;
-            text-align: center;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .flow-step.highlight {
-            border-color: var(--accent);
-            background: rgba(34, 197, 94, 0.05);
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.1);
-        }
-
-        .flow-step h4 {
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-
-        .flow-step p {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .flow-arrow {
-            font-size: 20px;
-            color: var(--text-muted);
-            flex-shrink: 0;
-            padding: 0 8px;
-        }
-
-        /* Comparison table */
-        .compare-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 24px;
-        }
-
-        .compare-table th {
-            text-align: left;
-            padding: 12px 16px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--text-muted);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .compare-table td {
-            padding: 14px 16px;
-            font-size: 14px;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-secondary);
-        }
-
-        .compare-table tr:last-child td { border-bottom: none; }
-
-        .compare-table .us td {
-            color: var(--text-primary);
-            background: rgba(34, 197, 94, 0.03);
-        }
-
-        .compare-table .us td:first-child {
-            color: var(--accent);
-            font-weight: 600;
-        }
-
-        .check { color: var(--accent); font-weight: 700; }
-        .cross { color: var(--text-muted); }
-        .partial { color: var(--warning); }
-
-        /* Two column layout */
-        .two-col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 48px;
-            align-items: start;
-        }
-
-        .two-col.wide-right { grid-template-columns: 2fr 3fr; }
-        .two-col.wide-left { grid-template-columns: 3fr 2fr; }
-
-        /* Workflow cards */
-        .wf-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 12px;
-            display: flex;
-            gap: 16px;
-            align-items: flex-start;
-        }
-
-        .wf-num {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: var(--accent-dim);
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .wf-content h4 {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .wf-content p {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        /* Tag */
-        .tag {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.03em;
-        }
-
-        .tag.green { background: var(--accent-dim); color: var(--accent); }
-        .tag.purple { background: var(--jobber-blue-dim); color: var(--jobber-blue); }
-        .tag.amber { background: rgba(245,158,11,0.15); color: var(--warning); }
-
-        /* Franchise tier */
-        .franchise-tier {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 28px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .franchise-tier.featured {
-            border-color: var(--accent);
-            box-shadow: 0 0 40px rgba(34, 197, 94, 0.08);
-        }
-
-        .franchise-tier.featured::before {
-            content: 'PARTNERSHIP OPPORTUNITY';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--accent);
-            color: var(--bg-primary);
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-align: center;
-            padding: 6px;
-        }
-
-        .franchise-tier.featured { padding-top: 44px; }
-
-        .tier-price {
-            font-size: 36px;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-        }
-
-        .tier-price span {
-            font-size: 16px;
-            font-weight: 400;
-            color: var(--text-muted);
-        }
-
-        .tier-list {
-            list-style: none;
-            margin-top: 20px;
-        }
-
-        .tier-list li {
-            font-size: 14px;
-            color: var(--text-secondary);
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .tier-list li:last-child { border-bottom: none; }
-
-        .tier-list .bullet {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
-            flex-shrink: 0;
-        }
-
-        /* Navigation arrows */
-        .nav-arrows {
-            position: fixed;
-            bottom: 32px;
-            right: 40px;
-            display: flex;
-            gap: 8px;
-            z-index: 100;
-        }
-
-        .nav-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text-secondary);
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-            background: var(--bg-card-hover);
-        }
-
-        /* Slide-specific */
-        .hero-layout {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 100%;
-        }
-
-        .pipeline-visual {
-            display: flex;
-            gap: 2px;
-            margin-top: 16px;
-            height: 8px;
-        }
-
-        .pipeline-bar {
-            border-radius: 4px;
-            height: 100%;
-        }
-
-        /* Location cards for franchise */
-        .loc-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-        }
-
-        .loc-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .loc-name {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .loc-rank {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 20px;
-        }
-
-        .loc-rank.gold { background: rgba(245,158,11,0.15); color: #f59e0b; }
-        .loc-rank.silver { background: rgba(148,163,184,0.15); color: #94a3b8; }
-        .loc-rank.alert { background: rgba(239,68,68,0.15); color: #ef4444; }
-
-        .loc-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .loc-stat-value {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .loc-stat-label {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        /* Self-healing layers */
-        .layer-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 24px;
-        }
-
-        .layer {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px 20px;
-        }
-
-        .layer-num {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--accent);
-            width: 24px;
-            flex-shrink: 0;
-        }
-
-        .layer-title {
-            font-size: 14px;
-            font-weight: 600;
-            flex: 1;
-        }
-
-        .layer-desc {
-            font-size: 12px;
-            color: var(--text-muted);
-            flex: 2;
-        }
-
-        /* Keyboard hint */
-        .key-hint {
-            position: fixed;
-            bottom: 36px;
-            left: 40px;
-            font-size: 12px;
-            color: var(--text-muted);
-            z-index: 100;
-        }
-
-        .key-hint kbd {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            font-family: inherit;
-            font-size: 11px;
-            margin: 0 2px;
-        }
-
-        /* Highlight block */
-        .highlight-block {
-            background: rgba(34, 197, 94, 0.05);
-            border: 1px solid rgba(34, 197, 94, 0.2);
-            border-radius: 12px;
-            padding: 24px;
-            margin-top: 24px;
-        }
-
-        .highlight-block h4 {
-            color: var(--accent);
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .highlight-block p {
-            font-size: 15px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        /* Quote block */
-        .quote-block {
-            border-left: 3px solid var(--accent);
-            padding-left: 20px;
-            margin-top: 24px;
-        }
-
-        .quote-block p {
-            font-size: 18px;
-            font-style: italic;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        .quote-block .attribution {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-style: normal;
-            margin-top: 8px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Dashboard — AGM Pro Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --bg-card: #111827;
+    --bg-hover: #1a2332;
+    --accent: #22c55e;
+    --accent-dim: rgba(34,197,94,0.15);
+    --accent-glow: rgba(34,197,94,0.3);
+    --jobber: #7c3aed;
+    --jobber-dim: rgba(124,58,237,0.15);
+    --jobber-glow: rgba(124,58,237,0.25);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59,130,246,0.15);
+    --amber: #f59e0b;
+    --amber-dim: rgba(245,158,11,0.15);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.15);
+    --cyan: #06b6d4;
+    --cyan-dim: rgba(6,182,212,0.15);
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.03);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  /* Header — single unified bar */
+  .header { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:14px 32px; background:rgba(10,15,26,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+  .header-left { display:flex; align-items:center; gap:10px; }
+  .header-logo { font-size:14px; font-weight:800; letter-spacing:-0.03em; line-height:1.1; }
+  .header-logo-sub { font-size:9px; font-weight:500; color:var(--text3); letter-spacing:0.05em; text-transform:uppercase; }
+  .header-logo-sub .jb { color:var(--jobber); font-weight:600; }
+  .header-center { text-align:center; }
+  .header-client { font-size:18px; font-weight:800; color:var(--text); letter-spacing:-0.02em; line-height:1.2; }
+  .header-client-sub { font-size:10px; font-weight:500; color:var(--text3); letter-spacing:0.04em; text-transform:uppercase; margin-top:1px; }
+  .header-right { display:flex; align-items:center; justify-content:flex-end; gap:16px; }
+  .header-sync { text-align:right; line-height:1.3; }
+  .sync-label { font-size:9px; color:var(--text3); text-transform:uppercase; letter-spacing:0.04em; }
+  .sync-time { font-size:10px; color:var(--text2); font-weight:600; }
+  .status-badge { display:flex; align-items:center; gap:7px; background:var(--accent-dim); border:1px solid rgba(34,197,94,0.2); padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600; color:var(--accent); letter-spacing:0.05em; text-transform:uppercase; }
+  .status-badge.offline { background:var(--red-dim); border-color:rgba(239,68,68,0.2); color:var(--red); }
+  .status-dot { width:7px; height:7px; border-radius:50%; background:currentColor; animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 var(--accent-glow)} 50%{box-shadow:0 0 0 5px transparent} }
+
+  /* Filter bar */
+  .filter-bar { display:flex; justify-content:center; align-items:center; padding:8px 32px; background:rgba(17,24,39,0.4); border-bottom:1px solid var(--border); }
+  .time-filters { display:flex; align-items:center; gap:0; }
+  .time-filter { padding:6px 16px; font-size:11px; font-weight:600; color:var(--text3); background:none; border:1px solid var(--border); cursor:pointer; transition:all 0.2s; letter-spacing:0.02em; }
+  .time-filter:first-child { border-radius:8px 0 0 8px; }
+  .time-filter:last-child { border-radius:0 8px 8px 0; }
+  .time-filter:not(:first-child) { border-left:none; }
+  .time-filter:hover { color:var(--text2); background:rgba(255,255,255,0.03); }
+  .time-filter.active { background:var(--jobber-dim); color:var(--jobber); border-color:rgba(124,58,237,0.3); }
+  .time-filter.active + .time-filter { border-left-color:rgba(124,58,237,0.3); }
+
+  /* Main */
+  .main { padding:20px 32px 32px; max-width:1400px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+
+  /* Metrics Row */
+  .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .metric { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px 20px; position:relative; overflow:hidden; transition:border-color 0.3s; }
+  .metric:hover { border-color:rgba(255,255,255,0.1); }
+  .metric::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+  .metric:nth-child(1)::before { background:linear-gradient(90deg,var(--accent),transparent); }
+  .metric:nth-child(2)::before { background:linear-gradient(90deg,var(--jobber),transparent); }
+  .metric:nth-child(3)::before { background:linear-gradient(90deg,var(--blue),transparent); }
+  .metric:nth-child(4)::before { background:linear-gradient(90deg,var(--amber),transparent); }
+  .metric-label { font-size:11px; font-weight:500; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+  .metric-val { font-size:28px; font-weight:800; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; line-height:1; }
+  .metric:nth-child(1) .metric-val { color:var(--accent); }
+  .metric:nth-child(2) .metric-val { color:var(--jobber); }
+  .metric:nth-child(3) .metric-val { color:var(--blue); }
+  .metric:nth-child(4) .metric-val { color:var(--amber); }
+  .metric-sub { font-size:11px; color:var(--text3); margin-top:4px; }
+
+  /* Pipeline Card — rich format */
+  .pipeline-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+  .pipeline-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .pipeline-title { font-size:14px; font-weight:700; }
+  .pipeline-badge { font-size:10px; font-weight:600; padding:4px 12px; border-radius:12px; background:var(--accent-dim); color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; }
+  .pipeline-stages { display:flex; flex-direction:column; }
+
+  .p-stage { display:flex; align-items:center; gap:14px; padding:14px 0; position:relative; }
+  .p-stage:not(:last-child) { border-bottom:1px solid var(--border); }
+  .p-stage-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+  .p-stage-info { flex:1; min-width:0; }
+  .p-stage-name { font-size:13px; font-weight:600; color:var(--text); margin-bottom:3px; }
+  .p-stage-meta { display:flex; align-items:baseline; gap:8px; }
+  .p-stage-count { font-size:24px; font-weight:800; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; }
+  .p-stage-count.active { animation:soft-pulse 3s ease-in-out infinite; }
+  @keyframes soft-pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+  .p-stage-label { font-size:11px; color:var(--text3); font-weight:500; }
+  .p-stage-bar { width:100%; height:4px; background:rgba(255,255,255,0.04); border-radius:2px; margin-top:6px; overflow:hidden; }
+  .p-stage-bar-fill { height:100%; border-radius:2px; transition:width 1.5s cubic-bezier(0.16,1,0.3,1); width:0; }
+  .p-stage-context { font-size:11px; color:var(--text3); margin-top:4px; }
+  .p-stage-context .rate { color:var(--accent); font-weight:600; }
+  .p-stage-value { font-size:13px; font-weight:700; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; flex-shrink:0; min-width:80px; }
+
+  /* Middle Grid — 2 panels (compact) */
+  .duo-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  /* Activity Feed */
+  .card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+  .card-head { display:flex; justify-content:space-between; align-items:center; padding:14px 18px 10px; }
+  .card-title { font-size:13px; font-weight:600; }
+  .badge { font-size:10px; font-weight:600; padding:3px 9px; border-radius:10px; text-transform:uppercase; letter-spacing:0.04em; }
+  .badge.live { background:var(--accent-dim); color:var(--accent); }
+  .badge.info { background:var(--blue-dim); color:var(--blue); }
+
+  .feed-container { flex:1; overflow:hidden; position:relative; padding:0 18px; max-height:220px; }
+  .feed-container::after { content:''; position:absolute; bottom:0; left:0; right:0; height:40px; background:linear-gradient(transparent, var(--bg-card)); pointer-events:none; z-index:2; }
+  .feed-track { display:flex; flex-direction:column; gap:4px; }
+  .feed-container.auto-scroll .feed-track { animation:feed-scroll 30s linear infinite; }
+  .feed-container.manual-scroll { overflow-y:auto; }
+  .feed-container.manual-scroll .feed-track { animation:none; }
+  .feed-container::-webkit-scrollbar { width:4px; }
+  .feed-container::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  @keyframes feed-scroll { 0%{transform:translateY(0)} 100%{transform:translateY(-50%)} }
+  .feed-item { display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:8px; background:var(--border2); transition:background 0.2s; flex-shrink:0; }
+  .feed-item:hover { background:rgba(255,255,255,0.04); }
+  .feed-item.highlight { background:var(--accent-dim); border:1px solid rgba(34,197,94,0.12); }
+  .feed-dot { width:6px; height:6px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+  .feed-dot.green { background:var(--accent); box-shadow:0 0 6px var(--accent-glow); }
+  .feed-dot.blue { background:var(--blue); box-shadow:0 0 6px rgba(59,130,246,0.3); }
+  .feed-dot.purple { background:var(--jobber); box-shadow:0 0 6px var(--jobber-glow); }
+  .feed-dot.amber { background:var(--amber); box-shadow:0 0 6px rgba(245,158,11,0.3); }
+  .feed-dot.red { background:var(--red); box-shadow:0 0 6px rgba(239,68,68,0.3); }
+  .feed-text { font-size:12px; color:var(--text2); line-height:1.4; flex:1; }
+  .feed-text strong { color:var(--text); font-weight:600; }
+  .feed-time { font-size:10px; color:var(--text3); white-space:nowrap; margin-top:2px; }
+  .feed-amount { color:var(--accent); font-weight:700; }
+
+  /* Conversion Funnel */
+  .funnel-body { padding:12px 18px 14px; display:flex; flex-direction:column; gap:6px; }
+  .funnel-step { display:flex; align-items:center; gap:12px; }
+  .funnel-bar-wrap { flex:1; height:28px; background:rgba(255,255,255,0.04); border-radius:6px; overflow:hidden; }
+  .funnel-bar { height:100%; border-radius:6px; transition:width 1.2s cubic-bezier(0.16,1,0.3,1); background:var(--blue); }
+  .funnel-bar.quoted { background:var(--amber); }
+  .funnel-bar.won { background:var(--accent); }
+  .funnel-label { font-size:12px; font-weight:600; color:var(--text2); width:55px; text-align:right; }
+  .funnel-count { font-size:14px; font-weight:800; color:var(--text); width:35px; font-variant-numeric:tabular-nums; }
+  .funnel-arrow { text-align:center; font-size:9px; color:var(--text3); line-height:1; margin:2px 0; letter-spacing:0.04em; }
+  .funnel-rates { display:flex; gap:16px; margin-top:8px; padding-top:10px; border-top:1px solid var(--border); }
+  .funnel-rate { font-size:11px; color:var(--text3); }
+  .rate-val { font-weight:800; font-size:16px; color:var(--accent); margin-right:4px; }
+
+  /* Product Mix */
+  .product-body { padding:6px 18px 14px; display:flex; flex-direction:column; gap:4px; }
+  .product-row { display:grid; grid-template-columns:1fr 1fr 70px 80px; align-items:center; gap:8px; padding:7px 10px; border-radius:6px; background:var(--border2); }
+  .product-row:hover { background:rgba(255,255,255,0.04); }
+  .product-name { font-size:12px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .product-sqft { font-size:12px; font-weight:700; color:var(--cyan); text-align:right; font-variant-numeric:tabular-nums; }
+  .product-val { font-size:12px; font-weight:700; color:var(--accent); text-align:right; font-variant-numeric:tabular-nums; }
+  .product-header { font-size:10px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:0.05em; padding:4px 10px; }
+  .product-total { border-top:1px solid var(--border); margin-top:4px; padding-top:8px; }
+  .product-total .product-name { color:var(--text2); }
+  .product-bar-track { height:6px; background:rgba(255,255,255,0.04); border-radius:3px; overflow:hidden; }
+  .product-bar { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.16,1,0.3,1); }
+  .product-empty { font-size:12px; color:var(--text3); padding:20px 10px; text-align:center; }
+
+  /* Footer */
+  .footer { text-align:center; font-size:11px; color:var(--text3); padding:20px 32px; border-top:1px solid var(--border); margin-top:8px; }
+  .footer a { color:var(--text2); text-decoration:none; }
+  .footer a:hover { color:var(--accent); }
+
+  /* Loading shimmer */
+  .shimmer { background:linear-gradient(90deg,var(--bg-card) 25%,var(--bg-hover) 50%,var(--bg-card) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  @media(max-width:900px) {
+    .metrics { grid-template-columns:repeat(2,1fr); }
+    .duo-grid { grid-template-columns:1fr; }
+    .header { grid-template-columns:1fr 1fr; padding:12px 16px; }
+    .header-center { grid-column:1/-1; order:3; margin-top:8px; }
+    .main { padding:16px; }
+  }
+  @media(max-width:600px) {
+    .metrics { grid-template-columns:1fr; }
+    .header { grid-template-columns:1fr auto; }
+    .sub-header-center { flex-wrap:wrap; }
+    .time-filter { font-size:10px; padding:5px 10px; }
+  }
+</style>
 </head>
 <body>
 
-<nav class="nav">
-    <div class="nav-brand">
-        <div class="nav-logo">A</div>
-        <div class="nav-title">AGM Pro Tools <span>/ Jobber Partnership</span></div>
+<header class="header">
+  <div class="header-left">
+    <div>
+      <div class="header-logo">AGM Pro Tools</div>
+      <div class="header-logo-sub">Powered by <span class="jb">Jobber</span></div>
     </div>
-    <div class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">10</span></div>
-</nav>
-
-<div class="progress-bar" id="progressBar"></div>
-
-<div class="slides-container" id="slidesContainer">
-
-    <!-- SLIDE 1: Title -->
-    <div class="slide active" data-slide="1">
-        <div class="slide-inner hero-layout">
-            <div class="slide-label">Partnership Proposal</div>
-            <h1>Jobber runs the job.<br><span class="accent">We run the growth.</span></h1>
-            <p class="subtitle">AGM Pro Tools is an agentic automation layer that turns Jobber data into revenue — automatically. Follow-ups fire, quotes get chased, reviews go out. Your customers don't log into anything new.</p>
-            <div class="stat-row">
-                <div class="stat">
-                    <div class="stat-value">4</div>
-                    <div class="stat-label">Live workflows</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">3,744</div>
-                    <div class="stat-label">Quotes processed</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value">0</div>
-                    <div class="stat-label">Manual steps</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value purple">4</div>
-                    <div class="stat-label">Self-healing layers</div>
-                </div>
-            </div>
-        </div>
+  </div>
+  <div class="header-center">
+    <div class="header-client" id="clientName">Texas Turf Company</div>
+    <div class="header-client-sub">Sales Performance Dashboard</div>
+  </div>
+  <div class="header-right">
+    <div class="header-sync">
+      <div class="sync-label">Updated</div>
+      <div class="sync-time" id="lastSync">--</div>
     </div>
-
-    <!-- SLIDE 2: The Problem -->
-    <div class="slide" data-slide="2">
-        <div class="slide-inner">
-            <div class="slide-label">The Problem</div>
-            <h2>Jobber handles the middle.<br>Nobody handles the ends.</h2>
-            <p class="subtitle">Your customers lose revenue at two points Jobber wasn't designed to cover: before the quote (lead response) and after the job (reviews + reactivation).</p>
-            <div class="flow">
-                <div class="flow-step" style="border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.03);">
-                    <h4 style="color: var(--danger);">Lead Comes In</h4>
-                    <p>Avg response: 42 min</p>
-                    <p style="color: var(--danger); font-weight: 600; margin-top: 4px;">78% lost to first responder</p>
-                </div>
-                <div class="flow-arrow">&rarr;</div>
-                <div class="flow-step">
-                    <h4>Quote Sent</h4>
-                    <p>Jobber handles this</p>
-                </div>
-                <div class="flow-arrow">&rarr;</div>
-                <div class="flow-step" style="border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.03);">
-                    <h4 style="color: var(--warning);">Quote Follow-Up</h4>
-                    <p>Most contractors: 0-1 follow-ups</p>
-                    <p style="color: var(--warning); font-weight: 600; margin-top: 4px;">$47K avg left on table</p>
-                </div>
-                <div class="flow-arrow">&rarr;</div>
-                <div class="flow-step">
-                    <h4>Job Completed</h4>
-                    <p>Jobber handles this</p>
-                </div>
-                <div class="flow-arrow">&rarr;</div>
-                <div class="flow-step" style="border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.03);">
-                    <h4 style="color: var(--danger);">Reviews &amp; Referrals</h4>
-                    <p>Manual, inconsistent</p>
-                    <p style="color: var(--danger); font-weight: 600; margin-top: 4px;">92% never requested</p>
-                </div>
-            </div>
-            <div class="highlight-block">
-                <h4>The Gap</h4>
-                <p>Jobber stores the contact. It doesn't <em>work</em> the contact. That's where revenue leaks — and that's exactly what AGM Pro Tools automates.</p>
-            </div>
-        </div>
+    <div class="status-badge" id="statusBadge">
+      <span class="status-dot"></span>
+      <span id="statusText">Connecting...</span>
     </div>
+  </div>
+</header>
 
-    <!-- SLIDE 3: How It Works -->
-    <div class="slide" data-slide="3">
-        <div class="slide-inner">
-            <div class="slide-label">How It Works</div>
-            <h2>An agentic layer that acts<br>on Jobber events in real time</h2>
-            <p class="subtitle">Not a sync tool. Not a Zap. An intelligent automation layer that understands your customers' business.</p>
-            <div class="card-grid cols-4" style="margin-top: 32px;">
-                <div class="wf-card" style="flex-direction: column; text-align: center; padding: 24px;">
-                    <div class="wf-num" style="margin: 0 auto 12px;">1</div>
-                    <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Lead &rarr; Jobber Client</h4>
-                    <p style="font-size: 12px; color: var(--text-muted);">New lead tagged in CRM auto-creates Jobber client with address + property. Dedup by email.</p>
-                </div>
-                <div class="wf-card" style="flex-direction: column; text-align: center; padding: 24px;">
-                    <div class="wf-num" style="margin: 0 auto 12px;">2</div>
-                    <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Quote Sent &rarr; Pipeline</h4>
-                    <p style="font-size: 12px; color: var(--text-muted);">Quote leaves Jobber, opportunity auto-created in CRM pipeline with value + client info.</p>
-                </div>
-                <div class="wf-card" style="flex-direction: column; text-align: center; padding: 24px;">
-                    <div class="wf-num" style="margin: 0 auto 12px;">3</div>
-                    <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Quote Approved &rarr; Data</h4>
-                    <p style="font-size: 12px; color: var(--text-muted);">Extracts product type + sqft from line items. Writes structured data to CRM custom fields.</p>
-                </div>
-                <div class="wf-card" style="flex-direction: column; text-align: center; padding: 24px;">
-                    <div class="wf-num" style="margin: 0 auto 12px;">4</div>
-                    <h4 style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Job Closed &rarr; Reviews</h4>
-                    <p style="font-size: 12px; color: var(--text-muted);">Job completes in Jobber, review request fires automatically. Zero manual work.</p>
-                </div>
-            </div>
-            <div class="highlight-block" style="margin-top: 24px;">
-                <h4>Headless Architecture</h4>
-                <p>The contractor never logs into AGM. They keep using Jobber exactly as they do today. The automation runs invisibly underneath — follow-ups, quote chasing, review requests all fire without a single new login or dashboard to learn.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 4: Live Proof — Texas Turf -->
-    <div class="slide" data-slide="4">
-        <div class="slide-inner">
-            <div class="slide-label green">Live Client</div>
-            <h2>Texas Turf Company</h2>
-            <p class="subtitle">Running in production since February 2026. Not a demo — real Jobber data, real automations, real results.</p>
-            <div class="two-col" style="margin-top: 32px;">
-                <div>
-                    <div class="stat-row" style="flex-wrap: wrap; gap: 24px;">
-                        <div class="stat">
-                            <div class="stat-value" style="font-size: 32px;">3,744</div>
-                            <div class="stat-label">Quotes processed</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" style="font-size: 32px;">1,803</div>
-                            <div class="stat-label">Jobs tracked</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" style="font-size: 32px;">48/50</div>
-                            <div class="stat-label">Job-to-quote link rate</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" style="font-size: 32px;">11</div>
-                            <div class="stat-label">Turf products recognized</div>
-                        </div>
-                    </div>
-                    <div class="quote-block" style="margin-top: 32px;">
-                        <p>"We tried Zapier. It broke constantly. This just runs."</p>
-                        <div class="attribution">Ivana, Texas Turf Company</div>
-                    </div>
-                </div>
-                <div>
-                    <h3 style="font-size: 15px; margin-bottom: 16px; color: var(--text-muted); font-weight: 600;">DOMAIN INTELLIGENCE</h3>
-                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px;">
-                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">The system understands turf products — extracting structured data from Jobber line items:</p>
-                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                            <span class="tag green">Kent 44</span>
-                            <span class="tag green">Majestic 70</span>
-                            <span class="tag green">Saratoga 40</span>
-                            <span class="tag green">TexasLush 80</span>
-                            <span class="tag green">TexasPro 60</span>
-                            <span class="tag green">SilverBlade 60</span>
-                            <span class="tag green">Bermuda 50</span>
-                            <span class="tag green">Pacific 50</span>
-                            <span class="tag green">Augusta</span>
-                            <span class="tag green">Royal 40</span>
-                            <span class="tag green">Sierra 50</span>
-                        </div>
-                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 12px;">+ square footage extraction, add-on detection (Wonderfill, Wonder Edge, Maintenance), boilerplate filtering</p>
-                    </div>
-                    <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 12px;">
-                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">Deduplication handles the real world:</p>
-                        <p style="font-size: 12px; color: var(--text-muted);">Email-based dedup prevents double-creates. Idempotent event processing means webhooks can fire twice safely. Edge case: 6% of quotes have no email — handled gracefully.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 5: Self-Healing -->
-    <div class="slide" data-slide="5">
-        <div class="slide-inner">
-            <div class="slide-label">Reliability</div>
-            <h2>4-layer self-healing architecture</h2>
-            <p class="subtitle">Built for contractors who can't afford downtime. If something breaks, it fixes itself — and tells you what happened.</p>
-            <div class="layer-stack">
-                <div class="layer">
-                    <div class="layer-num">L1</div>
-                    <div class="layer-title">Automatic Retry Queue</div>
-                    <div class="layer-desc">Failed events buffered on disk. Cron replays every 15 minutes with exponential backoff. Covers ~90% of transient failures silently.</div>
-                    <span class="tag green">SILENT</span>
-                </div>
-                <div class="layer">
-                    <div class="layer-num">L2</div>
-                    <div class="layer-title">Error Classification</div>
-                    <div class="layer-desc">AI classifies each failure: transient (retry), data issue (skip + log), code bug (escalate). No false alarms, no missed bugs.</div>
-                    <span class="tag amber">SMART</span>
-                </div>
-                <div class="layer">
-                    <div class="layer-num">L3</div>
-                    <div class="layer-title">Slack Escalation</div>
-                    <div class="layer-desc">After 3 retry failures: @channel alert with client name, event type, error details, and quote ID. Nobody finds out at month-end.</div>
-                    <span class="tag amber">LOUD</span>
-                </div>
-                <div class="layer">
-                    <div class="layer-num">L4</div>
-                    <div class="layer-title">AI Root Cause Analysis</div>
-                    <div class="layer-desc">Hourly cron reads unresolved alerts. AI posts root cause + fix recommendation as thread reply. Diagnosis happens while you sleep.</div>
-                    <span class="tag purple">AI-POWERED</span>
-                </div>
-            </div>
-            <div class="highlight-block" style="margin-top: 24px;">
-                <h4>Why This Matters for Jobber</h4>
-                <p>Your marketplace integrations are only as good as their uptime. Zapier breaks and nobody notices until the customer calls. CRM Connector logs errors nobody reads. AGM Pro Tools <em>diagnoses itself</em> — and at scale (Layer 5), will auto-deploy fixes without human intervention.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 6: The Automation Playbook -->
-    <div class="slide" data-slide="6">
-        <div class="slide-inner">
-            <div class="slide-label">The Full Playbook</div>
-            <h2>8 automations that close the loop<br><span class="accent">from lead to review</span></h2>
-            <p class="subtitle">Each automation triggers from a real Jobber event. No manual setup per customer — the playbook deploys in minutes.</p>
-            <div class="card-grid cols-4" style="margin-top: 28px;">
-                <div class="card">
-                    <div class="card-icon green">&#x26A1;</div>
-                    <h3>Speed-to-Lead</h3>
-                    <p>New lead comes in, instant response fires. Text, email, or voicemail drop. First contractor to respond wins the job.</p>
-                    <div style="margin-top: 8px;"><span class="tag green">LIVE</span></div>
-                </div>
-                <div class="card">
-                    <div class="card-icon green">&#x1F4DE;</div>
-                    <h3>Missed Call Recovery</h3>
-                    <p>Missed call triggers automatic text-back within 60 seconds. "Sorry I missed you — can I help?" Recovers 30%+ of lost calls.</p>
-                    <div style="margin-top: 8px;"><span class="tag green">LIVE</span></div>
-                </div>
-                <div class="card">
-                    <div class="card-icon green">&#x1F4CB;</div>
-                    <h3>Quote Follow-Up</h3>
-                    <p>Quote sent in Jobber, follow-up sequence fires automatically. Day 1, Day 3, Day 7. Stops when quote is approved.</p>
-                    <div style="margin-top: 8px;"><span class="tag green">LIVE</span></div>
-                </div>
-                <div class="card">
-                    <div class="card-icon green">&#x2B50;</div>
-                    <h3>Review Collection</h3>
-                    <p>Job closes in Jobber, review request goes out. Google, Yelp, or custom link. Timed perfectly — while the customer is still happy.</p>
-                    <div style="margin-top: 8px;"><span class="tag green">LIVE</span></div>
-                </div>
-                <div class="card">
-                    <div class="card-icon amber">&#x1F91D;</div>
-                    <h3>Referral Program</h3>
-                    <p>Post-review, referral ask fires. "Know someone who needs turf?" Turns happy customers into lead sources automatically.</p>
-                    <div style="margin-top: 8px;"><span class="tag amber">READY</span></div>
-                </div>
-                <div class="card">
-                    <div class="card-icon amber">&#x1F504;</div>
-                    <h3>Client Reactivation</h3>
-                    <p>No activity in 90+ days? Re-engagement campaign fires. "We noticed it's been a while — here's a seasonal offer."</p>
-                    <div style="margin-top: 8px;"><span class="tag amber">READY</span></div>
-                </div>
-                <div class="card">
-                    <div class="card-icon amber">&#x1F326;</div>
-                    <h3>Seasonal Campaigns</h3>
-                    <p>Calendar-triggered outreach. Spring cleanup, fall maintenance, holiday promos. Segmented by service history from Jobber.</p>
-                    <div style="margin-top: 8px;"><span class="tag amber">READY</span></div>
-                </div>
-                <div class="card">
-                    <div class="card-icon purple">&#x1F399;</div>
-                    <h3>AI Voice Escalation</h3>
-                    <p>High-value quote stalls? AI voice agent calls the lead. Conversational, branded, human-sounding. Last resort before lost.</p>
-                    <div style="margin-top: 8px;"><span class="tag purple">ROADMAP</span></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 7: Why Jobber Wins -->
-    <div class="slide" data-slide="7">
-        <div class="slide-inner">
-            <div class="slide-label purple">Why Jobber Wins</div>
-            <h2>We make your customers<br><span class="purple">impossible to churn</span></h2>
-            <p class="subtitle">Every automation we build increases the value a contractor gets from Jobber. More value = higher retention = lower churn.</p>
-            <div class="two-col" style="margin-top: 32px;">
-                <div>
-                    <h3 style="font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 20px;">THE STICKINESS LOOP</h3>
-                    <div class="card" style="margin-bottom: 12px; border-color: rgba(34,197,94,0.3);">
-                        <div style="display: flex; gap: 16px; align-items: flex-start;">
-                            <div class="wf-num">1</div>
-                            <div>
-                                <h3 style="font-size: 14px;">Contractor signs up for Jobber</h3>
-                                <p style="font-size: 13px; color: var(--text-muted);">Manages jobs, quotes, invoices. Standard FSM value.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card" style="margin-bottom: 12px; border-color: rgba(34,197,94,0.3);">
-                        <div style="display: flex; gap: 16px; align-items: flex-start;">
-                            <div class="wf-num">2</div>
-                            <div>
-                                <h3 style="font-size: 14px;">AGM Pro Tools activates</h3>
-                                <p style="font-size: 13px; color: var(--text-muted);">Automations layer on top: follow-ups, reviews, reactivation. All powered by Jobber data.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card" style="margin-bottom: 12px; border-color: rgba(34,197,94,0.3);">
-                        <div style="display: flex; gap: 16px; align-items: flex-start;">
-                            <div class="wf-num">3</div>
-                            <div>
-                                <h3 style="font-size: 14px;">Contractor sees revenue lift</h3>
-                                <p style="font-size: 13px; color: var(--text-muted);">Faster lead response, higher close rates, more reviews. Attributes results to "the system."</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card" style="border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.03);">
-                        <div style="display: flex; gap: 16px; align-items: flex-start;">
-                            <div class="wf-num" style="background: var(--jobber-blue-dim); color: var(--jobber-blue);">4</div>
-                            <div>
-                                <h3 style="font-size: 14px; color: var(--jobber-blue);">Jobber becomes irreplaceable</h3>
-                                <p style="font-size: 13px; color: var(--text-muted);">Switching FSM means losing automation. The contractor stays on Jobber because leaving costs revenue.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <h3 style="font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 20px;">WHAT JOBBER GETS</h3>
-                    <div class="card" style="margin-bottom: 12px;">
-                        <div class="card-icon green">&#x1F512;</div>
-                        <h3>Higher Retention</h3>
-                        <p>Contractors who automate around their FSM churn at a fraction of the rate. AGM Pro Tools turns Jobber from "a tool" into "the backbone."</p>
-                    </div>
-                    <div class="card" style="margin-bottom: 12px;">
-                        <div class="card-icon purple">&#x1F4B0;</div>
-                        <h3>Revenue Per Customer</h3>
-                        <p>Contractors using AGM Pro Tools are higher-value Jobber customers — they send more quotes, close more jobs, and generate more invoices through the platform.</p>
-                    </div>
-                    <div class="card">
-                        <div class="card-icon amber">&#x1F31F;</div>
-                        <h3>Marketplace Differentiation</h3>
-                        <p>No other Jobber marketplace app offers agentic automation with self-healing. This is a category-defining listing that competitors can't replicate with Zapier.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 8: Competitive Landscape -->
-    <div class="slide" data-slide="8">
-        <div class="slide-inner">
-            <div class="slide-label">Competitive Landscape</div>
-            <h2>They move data.<br><span class="accent">We act on it.</span></h2>
-            <table class="compare-table">
-                <thead>
-                    <tr>
-                        <th style="width: 20%;">Solution</th>
-                        <th>Contact Sync</th>
-                        <th>Quote Tracking</th>
-                        <th>Line Item Extraction</th>
-                        <th>Auto Follow-Up</th>
-                        <th>Review Automation</th>
-                        <th>Self-Healing</th>
-                        <th>Domain Intelligence</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>HighLevel Native</td>
-                        <td class="check">&#10003;</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td>Free</td>
-                    </tr>
-                    <tr>
-                        <td>CRM Connector</td>
-                        <td class="check">&#10003;</td>
-                        <td class="partial">Partial</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td>$15-112/mo</td>
-                    </tr>
-                    <tr>
-                        <td>Zapier</td>
-                        <td class="check">&#10003;</td>
-                        <td class="partial">Manual</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="partial">Brittle</td>
-                        <td class="partial">Brittle</td>
-                        <td class="cross">&mdash;</td>
-                        <td class="cross">&mdash;</td>
-                        <td>$20-100/mo</td>
-                    </tr>
-                    <tr class="us">
-                        <td>AGM Pro Tools</td>
-                        <td class="check">&#10003;</td>
-                        <td class="check">&#10003;</td>
-                        <td class="check">&#10003;</td>
-                        <td class="check">&#10003;</td>
-                        <td class="check">&#10003;</td>
-                        <td class="check">&#10003;</td>
-                        <td class="check">&#10003;</td>
-                        <td>$297+/mo</td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="highlight-block" style="margin-top: 24px;">
-                <h4>The Free Integration Is Our Best Friend</h4>
-                <p>HighLevel's native integration is a <em>filter</em>, not a threat. It qualifies leads for us. Contractors who are satisfied by contact sync were never AGM buyers. The ones who outgrow sync — who need automation, intelligence, and reliability — that's our market.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 9: Multi-FSM Strategy -->
-    <div class="slide" data-slide="9">
-        <div class="slide-inner">
-            <div class="slide-label">Platform Strategy</div>
-            <h2>Jobber is our anchor.<br><span class="accent">The platform is FSM-agnostic.</span></h2>
-            <p class="subtitle">AGM Pro Tools connects to the software contractors already run. Jobber is first — but the architecture supports any FSM.</p>
-            <div class="card-grid cols-3" style="margin-top: 32px;">
-                <div class="card" style="border-color: rgba(34,197,94,0.3);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0;">Jobber</h3>
-                        <span class="tag green">LIVE</span>
-                    </div>
-                    <p>Texas Turf running in production. 4 workflows, self-healing, domain intelligence. First and deepest integration.</p>
-                </div>
-                <div class="card" style="border-color: rgba(34,197,94,0.3);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0;">Field Routes</h3>
-                        <span class="tag green">LIVE</span>
-                    </div>
-                    <p>Valleywide Pest Control. Subscription sync, 5-min polling, separate Modal app. Paying $297/mo (Core tier).</p>
-                </div>
-                <div class="card" style="border-color: rgba(245,158,11,0.3);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0;">Housecall Pro</h3>
-                        <span class="tag amber">BUILDING</span>
-                    </div>
-                    <p>Golden Mailer. Test integration underway. Third FSM connector in the platform.</p>
-                </div>
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0;">Odoo ERP</h3>
-                        <span class="tag purple">PITCHED</span>
-                    </div>
-                    <p>Real Turf. Manufacturer + dealer network. $697/mo tier. Pitch sent, demo conversation active.</p>
-                </div>
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0;">Method:CRM</h3>
-                        <span class="tag purple">PROSPECT</span>
-                    </div>
-                    <p>Turf Prep. QuickBooks ecosystem. Fifth FSM target in the platform roadmap.</p>
-                </div>
-                <div class="card" style="border-color: rgba(124,58,237,0.2); background: rgba(124,58,237,0.03);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="margin: 0; color: var(--jobber-blue);">Your FSM Here</h3>
-                    </div>
-                    <p>The architecture is connector-based. Adding a new FSM = one new sync script + client config. The automation layer, self-healing, and domain intelligence are universal.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SLIDE 10: Next Steps -->
-    <div class="slide" data-slide="10">
-        <div class="slide-inner">
-            <div class="slide-label purple">Next Steps</div>
-            <h2>Let's build this together.</h2>
-            <p class="subtitle">We're not asking for a listing. We're proposing a partnership — starting with a pilot and scaling into your highest-value customer segment.</p>
-            <div class="card-grid cols-3" style="margin-top: 32px;">
-                <div class="franchise-tier">
-                    <h3 style="font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">PHASE 1</h3>
-                    <h2 style="font-size: 20px; margin-bottom: 4px;">Pilot</h2>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Weeks 1-4</p>
-                    <ul class="tier-list">
-                        <li><span class="bullet"></span>Jobber Marketplace listing (approved)</li>
-                        <li><span class="bullet"></span>3 pilot customers (Jobber-sourced)</li>
-                        <li><span class="bullet"></span>Onboarding SOP + discovery call template</li>
-                        <li><span class="bullet"></span>Slack channel for support + feedback</li>
-                        <li><span class="bullet"></span>Weekly metrics report to Jobber</li>
-                    </ul>
-                </div>
-                <div class="franchise-tier featured">
-                    <h3 style="font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">PHASE 2</h3>
-                    <h2 style="font-size: 20px; margin-bottom: 4px;">Scale</h2>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Months 2-3</p>
-                    <ul class="tier-list">
-                        <li><span class="bullet"></span>Advanced automation tiers (Pro + Enterprise)</li>
-                        <li><span class="bullet"></span>Streamlined onboarding flow</li>
-                        <li><span class="bullet"></span>Co-marketing: case study + webinar</li>
-                        <li><span class="bullet"></span>Revenue share discussion</li>
-                        <li><span class="bullet"></span>10+ active Jobber accounts</li>
-                    </ul>
-                </div>
-                <div class="franchise-tier">
-                    <h3 style="font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px;">PHASE 3</h3>
-                    <h2 style="font-size: 20px; margin-bottom: 4px;">Channel</h2>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Month 4+</p>
-                    <ul class="tier-list">
-                        <li><span class="bullet"></span>Jobber sales team referral program</li>
-                        <li><span class="bullet"></span>Joint outreach to high-value accounts</li>
-                        <li><span class="bullet"></span>API certification / preferred partner</li>
-                        <li><span class="bullet"></span>Vertical-specific templates (turf, pest, HVAC)</li>
-                        <li><span class="bullet"></span>Featured marketplace placement</li>
-                    </ul>
-                </div>
-            </div>
-            <div style="text-align: center; margin-top: 40px;">
-                <p style="font-size: 16px; color: var(--text-secondary);">Troy Scott &middot; <span style="color: var(--accent);">Troy@agmprotools.com</span></p>
-                <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">agmprotools.com</p>
-            </div>
-        </div>
-    </div>
-
+<div class="filter-bar">
+  <div class="time-filters">
+    <button class="time-filter active" data-range="all">All Time</button>
+    <button class="time-filter" data-range="ytd">2026 YTD</button>
+    <button class="time-filter" data-range="q1">Q1 2026</button>
+    <button class="time-filter" data-range="30d">Last 30d</button>
+    <button class="time-filter" data-range="7d">Last 7d</button>
+  </div>
 </div>
 
-<!-- Navigation -->
-<div class="nav-arrows">
-    <button class="nav-btn" onclick="prevSlide()">&#8592;</button>
-    <button class="nav-btn" onclick="nextSlide()">&#8594;</button>
-</div>
+<main class="main">
 
-<div class="key-hint">
-    <kbd>&larr;</kbd> <kbd>&rarr;</kbd> or click arrows to navigate
-</div>
+  <!-- Metrics -->
+  <div class="metrics" id="metricsRow">
+    <div class="metric">
+      <div class="metric-label">Events Synced</div>
+      <div class="metric-val" id="mEventsSynced">--</div>
+      <div class="metric-sub">Webhook events processed</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Quotes Tracked</div>
+      <div class="metric-val" id="mQuotesTracked">--</div>
+      <div class="metric-sub">From Jobber into pipeline</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Auto Follow-Ups Sent</div>
+      <div class="metric-val" id="mFollowUps">--</div>
+      <div class="metric-sub" id="mFollowUpsSub">% of quotes</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Reviews Requested</div>
+      <div class="metric-val" id="mReviews">--</div>
+      <div class="metric-sub" id="mReviewsSub">% of completed jobs</div>
+    </div>
+  </div>
+
+  <!-- Activity + Funnel (compact row) -->
+  <div class="duo-grid">
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Recent Activity</span>
+        <span class="badge live" id="feedBadge">Live</span>
+      </div>
+      <div class="feed-container">
+        <div class="feed-track" id="activityFeed">
+          <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
+          <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
+          <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conversion Funnel -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Conversion Funnel</span>
+        <span class="badge info" id="funnelRange">All Time</span>
+      </div>
+      <div class="funnel-body" id="funnelBody">
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar" id="fLeads" style="width:0%"></div>
+          </div>
+          <div class="funnel-label">Leads</div>
+          <div class="funnel-count" id="fLeadsCount">--</div>
+        </div>
+        <div class="funnel-arrow">&#9660; conversion</div>
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar quoted" id="fQuoted" style="width:0%"></div>
+          </div>
+          <div class="funnel-label">Quoted</div>
+          <div class="funnel-count" id="fQuotedCount">--</div>
+        </div>
+        <div class="funnel-arrow">&#9660; conversion</div>
+        <div class="funnel-step">
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar won" id="fWon" style="width:0%"></div>
+          </div>
+          <div class="funnel-label">Won</div>
+          <div class="funnel-count" id="fWonCount">--</div>
+        </div>
+        <div class="funnel-rates" id="funnelRates">
+          <div class="funnel-rate"><span class="rate-val" id="fQuoteRate">--</span> quote rate</div>
+          <div class="funnel-rate"><span class="rate-val" id="fWinRate">--</span> win rate</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sales Pipeline — rich visual format -->
+  <div class="pipeline-card">
+    <div class="pipeline-header">
+      <div class="pipeline-title">Sales Pipeline</div>
+      <div class="pipeline-badge" id="pipelineBadge">Live</div>
+    </div>
+    <div class="pipeline-stages" id="pipelineStages">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- Product Mix — full width -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Product Mix</span>
+      <span class="badge info" id="productLabel">Products</span>
+    </div>
+    <div class="product-body" id="productBody">
+      <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  Powered by <a href="https://agmprotools.com" target="_blank">AGM Pro Tools</a> &mdash; Automated FSM Intelligence
+</footer>
 
 <script>
-    let currentSlide = 1;
-    const totalSlides = document.querySelectorAll('.slide').length;
+(function() {
+  'use strict';
 
-    document.getElementById('totalSlides').textContent = totalSlides;
+  // ── Configuration — SWAP THESE PER CLIENT ──
+  const CLIENT_SLUG = 'texas-turf';
+  const CLIENT_NAME = 'Texas Turf Company';
+  const CLIENT_TZ = 'America/Chicago';
+  const PRODUCT_LABEL = 'Turf Types';       // "Service Types", "Product Categories", etc.
+  const PRODUCT_UNIT = 'Sq Ft';             // "Units", "Hours", "Sq Ft", etc.
+  const PRODUCT_EMPTY_MSG = 'No product data yet. Data populates when quotes are approved.';
 
-    function showSlide(n) {
-        if (n < 1 || n > totalSlides) return;
-        currentSlide = n;
+  // ── Shared endpoints — same for all clients ──
+  const HEALTH_URL = 'https://agm-pro--agm-health-health.modal.run';
+  const PIPELINE_URL = 'https://agm-pro--agm-health-pipeline-data.modal.run';
+  const METRICS_URL = 'https://agm-pro--agm-health-jobber-metrics.modal.run';
 
-        document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
-        document.querySelector(`[data-slide="${n}"]`).classList.add('active');
-        document.getElementById('currentSlide').textContent = n;
-        document.getElementById('progressBar').style.width = ((n / totalSlides) * 100) + '%';
+  // Pipeline stages with visual config — icons, colors, labels, context
+  const PIPELINE_STAGES = [
+    { key: 'lead',                  name: 'Lead',                  icon: '&#11044;',  color: 'var(--blue)',    bg: 'var(--blue-dim)',    label: 'active now',          context: null,                                    active: true },
+    { key: 'two_way_conversation',  name: 'Two Way Conversation',  icon: '&#128172;', color: 'var(--cyan)',    bg: 'var(--cyan-dim)',    label: 'engaged',             context: null,                                    active: true },
+    { key: 'preliminary_quote',     name: 'Preliminary Quote',     icon: '&#128203;', color: '#818cf8',        bg: 'rgba(129,140,248,0.15)', label: 'estimating',     context: null,                                    active: true },
+    { key: 'site_evaluation',       name: 'Site Evaluation',       icon: '&#128205;', color: 'var(--jobber)',  bg: 'var(--jobber-dim)',  label: 'scheduled',           context: null,                                    active: true },
+    { key: 'design_preparation',    name: 'Design Preparation',    icon: '&#9998;',   color: '#a78bfa',        bg: 'rgba(167,139,250,0.15)', label: 'in design',     context: null,                                    active: true },
+    { key: 'quote_sent',            name: 'Quote Sent',            icon: '&#9993;',   color: 'var(--amber)',   bg: 'var(--amber-dim)',   label: 'awaiting response',   context: '_quote_rate',                           active: true },
+    { key: 'negotiation',           name: 'Negotiation',           icon: '&#8635;',   color: '#fb923c',        bg: 'rgba(251,146,60,0.15)', label: 'in discussion',  context: 'Active price negotiations',              active: true },
+    { key: 'quote_approved',        name: 'Quote Approved',        icon: '&#9733;',   color: 'var(--accent)',  bg: 'var(--accent-dim)',  label: 'won',                 context: '_win_rate',                             active: false },
+    { key: 'job_complete',          name: 'Job Complete',           icon: '&#10003;',  color: '#34d399',        bg: 'rgba(52,211,153,0.15)', label: 'completed',      context: null,                                    active: false },
+    { key: 'closed_lost',           name: 'Closed Lost',           icon: '&mdash;',   color: 'var(--text3)',   bg: 'rgba(100,116,139,0.1)', label: 'lost',           context: null,                                    active: false },
+  ];
+
+  // ── State ──
+  let lastRecentActivity = [];
+  let allPipelineData = null; // raw data for time filtering
+
+  // ── Fetch health (status badge only) ──
+  async function fetchHealth() {
+    try {
+      const resp = await fetch(HEALTH_URL + '?_=' + Date.now());
+      if (!resp.ok) throw new Error('Health ' + resp.status);
+      return await resp.json();
+    } catch (e) {
+      console.error('Health fetch failed:', e);
+      return null;
+    }
+  }
+
+  // ── Fetch real metrics from event store ──
+  async function fetchMetrics(dateRange) {
+    try {
+      let url = METRICS_URL + '?client=' + CLIENT_SLUG + '&_=' + Date.now();
+      if (dateRange && dateRange.from) url += '&from=' + dateRange.from;
+      if (dateRange && dateRange.to) url += '&to=' + dateRange.to;
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Metrics ' + resp.status);
+      return await resp.json();
+    } catch (e) {
+      console.warn('Metrics fetch failed:', e);
+      return null;
+    }
+  }
+
+  function applyMetrics(m) {
+    if (!m) return;
+    animateCounter('mEventsSynced', m.events_synced || 0);
+    animateCounter('mQuotesTracked', m.quotes_tracked || 0);
+    animateCounter('mFollowUps', m.follow_ups_sent || 0);
+    animateCounter('mReviews', m.reviews_requested || 0);
+
+    // Update percentage subtexts
+    const quotePct = m.events_synced > 0 ? (m.quotes_tracked / m.events_synced * 100).toFixed(1) : '0';
+    document.getElementById('mFollowUpsSub').textContent = (m.events_synced > 0 ? ((m.follow_ups_sent / m.quotes_tracked) * 100).toFixed(1) : '0') + '% of quotes';
+    document.getElementById('mReviewsSub').textContent = (m.jobs_closed > 0 ? ((m.reviews_requested / m.jobs_closed) * 100).toFixed(1) : '0') + '% of completed jobs';
+  }
+
+  // ── Fetch pipeline data ──
+  async function fetchPipelineData(dateRange) {
+    const empty = {};
+    PIPELINE_STAGES.forEach(s => { empty[s.key] = { count: 0, value: 0 }; });
+
+    let staticData = null;
+
+    // Always load static JSON as baseline (no date filtering for static)
+    try {
+      const resp = await fetch('pipeline-data.json?_=' + Date.now());
+      if (resp.ok) staticData = await resp.json();
+    } catch(e) {
+      console.warn('Static pipeline data unavailable:', e);
     }
 
-    function nextSlide() { showSlide(currentSlide + 1); }
-    function prevSlide() { showSlide(currentSlide - 1); }
+    // Build Modal URL with optional date range
+    let modalUrl = PIPELINE_URL + '?client=' + CLIENT_SLUG + '&_=' + Date.now();
+    if (dateRange && dateRange.from) modalUrl += '&from=' + dateRange.from;
+    if (dateRange && dateRange.to) modalUrl += '&to=' + dateRange.to;
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
-        if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    // Try Modal endpoint for live data
+    try {
+      const resp = await fetch(modalUrl);
+      if (resp.ok) {
+        const pData = await resp.json();
+        if ((!pData.product_mix || pData.product_mix.length === 0) && staticData && staticData.product_mix && staticData.product_mix.length > 0) {
+          pData.product_mix = staticData.product_mix;
+        }
+        allPipelineData = pData;
+        updateSyncTime();
+        return applyPipelineData(pData, empty);
+      }
+    } catch(e) {
+      console.warn('Modal unavailable, using static JSON:', e);
+    }
+
+    // Fall back to static JSON
+    if (staticData) {
+      allPipelineData = staticData;
+      updateSyncTime('static');
+      return applyPipelineData(staticData, empty);
+    }
+
+    document.getElementById('mPipelineValue').textContent = '--';
+    document.getElementById('mOpenQuotes').textContent = '--';
+    return empty;
+  }
+
+  function applyPipelineData(pData, result) {
+    if (pData.recent_activity) lastRecentActivity = pData.recent_activity;
+    if (pData.funnel) buildFunnel(pData.funnel);
+    if (pData.product_mix !== undefined) buildProductMix(pData.product_mix);
+    if (pData.stages) {
+      Object.keys(pData.stages).forEach(k => { result[k] = pData.stages[k]; });
+    }
+
+    // Metrics are now handled by fetchMetrics() from the dedicated endpoint
+    return result;
+  }
+
+  // ── Animate counter from 0 to target ──
+  function animateCounter(id, target) {
+    const el = document.getElementById(id);
+    if (!el || target <= 0) { el.textContent = target.toLocaleString(); return; }
+    const duration = 1800;
+    const start = performance.now();
+    function tick(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      el.textContent = Math.round(target * eased).toLocaleString();
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // ── Update status badge ──
+  function updateStatus(health) {
+    const badge = document.getElementById('statusBadge');
+    const text = document.getElementById('statusText');
+    if (!health) {
+      badge.className = 'status-badge offline';
+      text.textContent = 'Offline';
+      return;
+    }
+    const client = health.clients ? health.clients[CLIENT_SLUG] : null;
+    if (!client || client.status === 'unhealthy') {
+      badge.className = 'status-badge offline';
+      text.textContent = 'Offline';
+    } else {
+      badge.className = 'status-badge';
+      text.textContent = 'Connected';
+    }
+  }
+
+  // ── Update sync timestamp ──
+  function updateSyncTime(source) {
+    const el = document.getElementById('lastSync');
+    const now = new Date();
+    const opts = { timeZone: CLIENT_TZ, month: 'numeric', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
+    const formatted = now.toLocaleString('en-US', opts);
+    el.textContent = formatted + (source === 'static' ? ' (cached)' : '');
+  }
+
+  // ── Build pipeline — rich visual format ──
+  function buildPipeline(pipelineData) {
+    const container = document.getElementById('pipelineStages');
+    const totalLeads = PIPELINE_STAGES.reduce((sum, s) => {
+      const d = pipelineData ? pipelineData[s.key] : null;
+      return sum + (d ? d.count : 0);
+    }, 0);
+    const maxCount = Math.max(...PIPELINE_STAGES.map(s => {
+      const d = pipelineData ? pipelineData[s.key] : null;
+      return d ? d.count : 0;
+    }), 1);
+
+    // Calculate rates for context lines
+    const quoteSentCount = pipelineData && pipelineData.quote_sent ? pipelineData.quote_sent.count : 0;
+    const wonCount = pipelineData && pipelineData.quote_approved ? pipelineData.quote_approved.count : 0;
+    const quoteRate = totalLeads > 0 ? Math.round(quoteSentCount / totalLeads * 100) : 0;
+    const winRate = totalLeads > 0 ? Math.round(wonCount / totalLeads * 100) : 0;
+
+    container.innerHTML = PIPELINE_STAGES.map(s => {
+      const d = pipelineData ? pipelineData[s.key] : { count: 0, value: 0 };
+      const count = d.count || 0;
+      const value = d.value || 0;
+      const pct = maxCount > 0 ? (count / maxCount * 100) : 0;
+      const valStr = value > 0 ? '$' + value.toLocaleString() : '';
+
+      // Build context line
+      let contextHtml = '';
+      if (s.context === '_quote_rate') {
+        contextHtml = '<div class="p-stage-context"><span class="rate">' + quoteRate + '%</span> of leads quoted</div>';
+      } else if (s.context === '_win_rate') {
+        contextHtml = '<div class="p-stage-context"><span class="rate">' + winRate + '%</span> win rate</div>';
+      } else if (s.context) {
+        contextHtml = '<div class="p-stage-context">' + s.context + '</div>';
+      }
+
+      return '<div class="p-stage">' +
+        '<div class="p-stage-icon" style="background:' + s.bg + '; color:' + s.color + ';">' + s.icon + '</div>' +
+        '<div class="p-stage-info">' +
+          '<div class="p-stage-name">' + s.name + '</div>' +
+          '<div class="p-stage-meta">' +
+            '<div class="p-stage-count ' + (s.active && count > 0 ? 'active' : '') + '" style="color:' + s.color + ';">' + count + '</div>' +
+            '<div class="p-stage-label">' + s.label + '</div>' +
+          '</div>' +
+          '<div class="p-stage-bar"><div class="p-stage-bar-fill" style="background:' + s.color + ';" data-pct="' + pct + '"></div></div>' +
+          contextHtml +
+        '</div>' +
+        (valStr ? '<div class="p-stage-value" style="color:' + s.color + ';">' + valStr + '</div>' : '') +
+      '</div>';
+    }).join('');
+
+    // Animate bars
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        container.querySelectorAll('.p-stage-bar-fill').forEach(bar => {
+          bar.style.width = bar.dataset.pct + '%';
+        });
+      }, 100);
+    });
+  }
+
+  // ── Build conversion funnel ──
+  function buildFunnel(funnel) {
+    if (!funnel || !funnel.leads) return;
+    const leads = funnel.leads, quoted = funnel.quoted, won = funnel.won;
+
+    document.getElementById('fLeadsCount').textContent = leads;
+    document.getElementById('fQuotedCount').textContent = quoted;
+    document.getElementById('fWonCount').textContent = won;
+
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        document.getElementById('fLeads').style.width = '100%';
+        document.getElementById('fQuoted').style.width = (leads > 0 ? quoted / leads * 100 : 0) + '%';
+        document.getElementById('fWon').style.width = (leads > 0 ? won / leads * 100 : 0) + '%';
+      }, 200);
     });
 
-    // Touch support
-    let touchStartX = 0;
-    document.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
-    document.addEventListener('touchend', e => {
-        const diff = touchStartX - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 50) diff > 0 ? nextSlide() : prevSlide();
+    document.getElementById('fQuoteRate').textContent = funnel.quote_rate + '%';
+    document.getElementById('fWinRate').textContent = funnel.win_rate + '%';
+  }
+
+  // ── Build product mix ──
+  function buildProductMix(products) {
+    const body = document.getElementById('productBody');
+
+    if (!products || products.length === 0) {
+      body.innerHTML = '<div class="product-empty">' + PRODUCT_EMPTY_MSG + '</div>';
+      return;
+    }
+
+    let totalSqft = 0, totalVal = 0;
+    products.forEach(p => { totalSqft += p.sqft; totalVal += p.value; });
+
+    const maxVal = Math.max(...products.map(p => p.value), 1);
+    const barColors = ['#3b82f6', '#7c3aed', '#06b6d4', '#22c55e', '#f59e0b', '#ef4444', '#818cf8', '#fb923c'];
+
+    let html = '<div class="product-row product-header"><div>Product</div><div>Volume</div><div style="text-align:right">' + PRODUCT_UNIT + '</div><div style="text-align:right">Revenue</div></div>';
+    products.forEach((p, i) => {
+      const pct = maxVal > 0 ? (p.value / maxVal * 100) : 0;
+      const color = barColors[i % barColors.length];
+      html += '<div class="product-row">' +
+        '<div class="product-name">' + p.name + '</div>' +
+        '<div class="product-bar-track"><div class="product-bar" style="background:' + color + '; width:0%;" data-pct="' + pct + '"></div></div>' +
+        '<div class="product-sqft">' + (p.sqft > 0 ? p.sqft.toLocaleString() : '--') + '</div>' +
+        '<div class="product-val">$' + Math.round(p.value).toLocaleString() + '</div>' +
+      '</div>';
     });
+
+    if (products.length > 1) {
+      html += '<div class="product-row product-total">' +
+        '<div class="product-name">Total</div>' +
+        '<div></div>' +
+        '<div class="product-sqft">' + totalSqft.toLocaleString() + '</div>' +
+        '<div class="product-val">$' + Math.round(totalVal).toLocaleString() + '</div>' +
+      '</div>';
+    }
+    body.innerHTML = html;
+
+    // Animate product bars
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        body.querySelectorAll('.product-bar').forEach(bar => {
+          bar.style.width = bar.dataset.pct + '%';
+        });
+      }, 200);
+    });
+  }
+
+  // ── Build activity feed ──
+  function buildActivityFeed(recentActivity) {
+    const feed = document.getElementById('activityFeed');
+
+    if (!recentActivity || recentActivity.length === 0) {
+      feed.innerHTML = '<div class="feed-item"><span class="feed-dot amber"></span><span class="feed-text">No recent activity</span><span class="feed-time">--</span></div>';
+      return;
+    }
+
+    const stageStyle = {
+      lead:                  { color: 'blue',   action: 'New lead' },
+      two_way_conversation:  { color: 'blue',   action: 'In conversation' },
+      preliminary_quote:     { color: 'purple',  action: 'Preliminary quote' },
+      site_evaluation:       { color: 'purple',  action: 'Site evaluation scheduled' },
+      design_preparation:    { color: 'purple',  action: 'Design in progress' },
+      quote_sent:            { color: 'amber',  action: 'Quote sent' },
+      negotiation:           { color: 'amber',  action: 'In negotiation' },
+      quote_approved:        { color: 'green',  action: 'Quote approved' },
+      job_complete:          { color: 'green',  action: 'Job completed' },
+      closed_lost:           { color: 'red',    action: 'Closed lost' },
+    };
+
+    // Filter out test/integration records client-side
+    const testWords = ['test', 'testing', 'integration test', 'demo', 'sample'];
+    const filtered = recentActivity.filter(item => {
+      const n = (item.name || '').toLowerCase();
+      const fn = (item.full_name || '').toLowerCase();
+      return !testWords.some(kw => n.includes(kw) || fn.includes(kw));
+    });
+
+    const events = filtered.map(item => {
+      const style = stageStyle[item.stage_key] || { color: 'blue', action: item.stage };
+      const name = item.name || 'Unknown';
+      const valStr = item.value > 0 ? ' &mdash; <span class="feed-amount">$' + Math.round(item.value).toLocaleString() + '</span>' : '';
+      const ts = item.timestamp ? timeAgo(new Date(item.timestamp)) : '';
+      const isWin = item.stage_key === 'quote_approved' && item.value > 0;
+
+      return {
+        color: style.color,
+        text: '<strong>' + name + '</strong> &mdash; ' + style.action + valStr,
+        time: ts,
+        highlight: isWin,
+      };
+    });
+
+    // Duplicate events for seamless infinite scroll loop
+    const allEvents = [...events, ...events];
+    feed.innerHTML = allEvents.map(ev =>
+      '<div class="feed-item' + (ev.highlight ? ' highlight' : '') + '">' +
+        '<span class="feed-dot ' + ev.color + '"></span>' +
+        '<span class="feed-text">' + ev.text + '</span>' +
+        '<span class="feed-time">' + ev.time + '</span>' +
+      '</div>'
+    ).join('');
+  }
+
+  // ── Time ago helper ──
+  function timeAgo(date) {
+    const secs = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (secs < 60) return secs + 's ago';
+    const mins = Math.floor(secs / 60);
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    return days + 'd ago';
+  }
+
+  // ── Date range calculator ──
+  function getDateRange(range) {
+    const now = new Date();
+    const pad = d => d.toISOString().slice(0, 10); // YYYY-MM-DD
+    switch (range) {
+      case '7d':  { const d = new Date(now); d.setDate(d.getDate() - 7); return { from: pad(d), to: pad(now) }; }
+      case '30d': { const d = new Date(now); d.setDate(d.getDate() - 30); return { from: pad(d), to: pad(now) }; }
+      case 'q1':  return { from: now.getFullYear() + '-01-01', to: now.getFullYear() + '-03-31' };
+      case 'ytd': return { from: now.getFullYear() + '-01-01', to: pad(now) };
+      default:    return {}; // all time — no filter
+    }
+  }
+
+  let activeRange = 'all';
+
+  // ── Feed scroll: auto-scroll by default, switch to manual on interaction ──
+  function initFeedScroll() {
+    const container = document.querySelector('.feed-container');
+    if (!container) return;
+    container.classList.add('auto-scroll');
+    let resumeTimer = null;
+
+    // On hover/touch/wheel — switch to manual scroll
+    function goManual() {
+      container.classList.remove('auto-scroll');
+      container.classList.add('manual-scroll');
+      clearTimeout(resumeTimer);
+      // Resume auto-scroll after 10 seconds of no interaction
+      resumeTimer = setTimeout(() => {
+        container.scrollTop = 0;
+        container.classList.remove('manual-scroll');
+        container.classList.add('auto-scroll');
+      }, 10000);
+    }
+
+    container.addEventListener('mouseenter', goManual);
+    container.addEventListener('wheel', goManual, { passive: true });
+    container.addEventListener('touchstart', goManual, { passive: true });
+
+    container.addEventListener('mouseleave', () => {
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => {
+        container.scrollTop = 0;
+        container.classList.remove('manual-scroll');
+        container.classList.add('auto-scroll');
+      }, 3000);
+    });
+  }
+
+  // ── Time filter buttons ──
+  document.querySelectorAll('.time-filter').forEach(btn => {
+    btn.addEventListener('click', async function() {
+      document.querySelectorAll('.time-filter').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeRange = this.dataset.range;
+      // Update funnel label to show active range
+      const rangeLabels = { all: 'All Time', ytd: '2026 YTD', q1: 'Q1 2026', '30d': 'Last 30 Days', '7d': 'Last 7 Days' };
+      document.getElementById('funnelRange').textContent = rangeLabels[activeRange] || 'All Time';
+      // Re-fetch with date range
+      const dateRange = getDateRange(activeRange);
+      const [pipelineData, metrics] = await Promise.all([
+        fetchPipelineData(dateRange),
+        fetchMetrics(dateRange),
+      ]);
+      buildPipeline(pipelineData);
+      buildActivityFeed(lastRecentActivity);
+      applyMetrics(metrics);
+    });
+  });
+
+  // ── Init ──
+  async function init() {
+    document.getElementById('clientName').textContent = CLIENT_NAME;
+    document.getElementById('productLabel').textContent = PRODUCT_LABEL;
+    document.title = CLIENT_NAME + ' \u2014 Client Dashboard';
+
+    // Fetch all data sources in parallel
+    const [health, pipelineData, metrics] = await Promise.all([
+      fetchHealth(),
+      fetchPipelineData(),
+      fetchMetrics(),
+    ]);
+
+    updateStatus(health);
+    buildPipeline(pipelineData);
+    buildActivityFeed(lastRecentActivity);
+    applyMetrics(metrics);
+    initFeedScroll();
+  }
+
+  init();
+
+  // Auto-refresh every 5 minutes
+  setInterval(async () => {
+    const [health, pData, metrics] = await Promise.all([
+      fetchHealth(),
+      fetchPipelineData(getDateRange(activeRange)),
+      fetchMetrics(getDateRange(activeRange)),
+    ]);
+    updateStatus(health);
+    buildPipeline(pData);
+    buildActivityFeed(lastRecentActivity);
+    applyMetrics(metrics);
+  }, 5 * 60 * 1000);
+
+})();
 </script>
 
 </body>
