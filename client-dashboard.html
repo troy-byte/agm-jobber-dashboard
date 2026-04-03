@@ -376,7 +376,14 @@
     return empty;
   }
 
+  // Store recent activity from last pipeline fetch
+  let lastRecentActivity = [];
+
   function applyPipelineData(pData, result) {
+    // Capture recent activity for the feed
+    if (pData.recent_activity) {
+      lastRecentActivity = pData.recent_activity;
+    }
     if (pData.stages) {
       Object.keys(pData.stages).forEach(k => {
         result[k] = pData.stages[k];
@@ -483,19 +490,6 @@
     // Badge — client always sees positive language
     hBadge.textContent = 'All Systems Go';
     hBadge.className = 'badge live';
-
-    // Update metrics from health data
-    const eventsToday = client.injections_today || 0;
-    const eventsWeek = client.injections_this_week || 0;
-    const eventsMonth = client.injections_this_month || 0;
-    const totalEvents = client.processed_events_count || 0;
-
-    // Use health data for what we can
-    document.getElementById('mJobsComplete').textContent = totalEvents.toLocaleString();
-    document.getElementById('mJobsComplete').closest('.metric').querySelector('.metric-sub').textContent = 'Total events processed';
-    document.getElementById('mWonMonth').textContent = eventsMonth.toLocaleString();
-    document.getElementById('mWonMonthSub').textContent = eventsWeek + ' this week, ' + eventsToday + ' today';
-    document.getElementById('mWonMonth').closest('.metric').querySelector('.metric-label').textContent = 'Events This Month';
   }
 
   // ── Build pipeline (static for now — will wire to GHL API) ──
@@ -533,45 +527,41 @@
     document.getElementById('pipelineUpdated').textContent = 'Updated: ' + new Date().toLocaleTimeString();
   }
 
-  // ── Build activity feed from health + sample events ──
-  function buildActivityFeed(health) {
+  // ── Build activity feed from real opportunity data ──
+  function buildActivityFeed(recentActivity) {
     const feed = document.getElementById('activityFeed');
-    const client = health && health.clients ? health.clients[CLIENT_SLUG] : null;
 
-    // Build events from what we know
-    const events = [];
-
-    if (client) {
-      if (client.last_event_at) {
-        events.push({ color: 'green', text: '<strong>Last sync event</strong> processed successfully', time: timeAgo(new Date(client.last_event_at)) });
-      }
-      if (client.injections_today > 0) {
-        events.push({ color: 'blue', text: '<strong>' + client.injections_today + ' events</strong> synced today', time: 'Today' });
-      }
-      if (client.injections_this_week > 0) {
-        events.push({ color: 'purple', text: '<strong>' + client.injections_this_week + ' events</strong> this week', time: 'This week' });
-      }
-      if (client.pending_retries > 0) {
-        events.push({ color: 'amber', text: '<strong>' + client.pending_retries + ' events</strong> pending retry', time: 'Queue' });
-      }
-      if (client.dead_retries > 0) {
-        events.push({ color: 'red', text: '<strong>' + client.dead_retries + ' events</strong> in dead letter queue', time: 'Needs attention' });
-      }
-      if (client.token_valid) {
-        const mins = Math.round(client.token_expires_in_minutes || 0);
-        events.push({ color: 'green', text: '<strong>Jobber token</strong> valid — refreshes in ' + mins + ' min', time: 'Active' });
-      }
+    if (!recentActivity || recentActivity.length === 0) {
+      feed.innerHTML = '<div class="feed-item"><span class="feed-dot amber"></span><span class="feed-text">No recent activity</span><span class="feed-time">--</span></div>';
+      return;
     }
 
-    // Integration workflow confirmations
-    events.push({ color: 'green', text: '<strong>WF1</strong> Lead tag &rarr; Jobber client creation', time: 'Active' });
-    events.push({ color: 'green', text: '<strong>WF2</strong> Quote Sent &rarr; Pipeline + follow-up', time: 'Active' });
-    events.push({ color: 'green', text: '<strong>WF3</strong> Quote Approved &rarr; Won + turf data', time: 'Active' });
-    events.push({ color: 'green', text: '<strong>WF4</strong> Job Complete &rarr; Review request', time: 'Active' });
+    // Map stage keys to colors and action descriptions
+    const stageStyle = {
+      lead:                  { color: 'blue',   action: 'New lead' },
+      two_way_conversation:  { color: 'blue',   action: 'In conversation' },
+      preliminary_quote:     { color: 'purple',  action: 'Preliminary quote' },
+      site_evaluation:       { color: 'purple',  action: 'Site evaluation scheduled' },
+      design_preparation:    { color: 'purple',  action: 'Design in progress' },
+      quote_sent:            { color: 'amber',  action: 'Quote sent' },
+      negotiation:           { color: 'amber',  action: 'In negotiation' },
+      quote_approved:        { color: 'green',  action: 'Quote approved' },
+      job_complete:          { color: 'green',  action: 'Job completed' },
+      closed_lost:           { color: 'red',    action: 'Closed lost' },
+    };
 
-    if (events.length === 0) {
-      events.push({ color: 'amber', text: 'No activity data available', time: '--' });
-    }
+    const events = recentActivity.map(item => {
+      const style = stageStyle[item.stage_key] || { color: 'blue', action: item.stage };
+      const name = item.name || 'Unknown';
+      const valStr = item.value > 0 ? ' &mdash; <span class="feed-amount">$' + Math.round(item.value).toLocaleString() + '</span>' : '';
+      const ts = item.timestamp ? timeAgo(new Date(item.timestamp)) : '';
+
+      return {
+        color: style.color,
+        text: '<strong>' + name + '</strong> &mdash; ' + style.action + valStr,
+        time: ts,
+      };
+    });
 
     feed.innerHTML = events.map(ev =>
       '<div class="feed-item">' +
@@ -602,11 +592,11 @@
     const health = await fetchHealth();
     updateStatus(health);
     updateHealthPanel(health);
-    buildActivityFeed(health);
 
-    // Fetch pipeline data — try Modal endpoint first, fall back to static JSON
+    // Fetch pipeline data — includes recent activity for the feed
     const pipelineData = await fetchPipelineData();
     buildPipeline(pipelineData);
+    buildActivityFeed(lastRecentActivity);
   }
 
   // Run
@@ -617,9 +607,9 @@
     const health = await fetchHealth();
     updateStatus(health);
     updateHealthPanel(health);
-    buildActivityFeed(health);
     const pData = await fetchPipelineData();
     buildPipeline(pData);
+    buildActivityFeed(lastRecentActivity);
   }, 5 * 60 * 1000);
 
 })();

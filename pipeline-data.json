@@ -45,5 +45,127 @@
       "value": 0,
       "name": "Negotiation"
     }
-  }
+  },
+  "recent_activity": [
+    {
+      "name": "Emily Wibel",
+      "full_name": "Emily Wibel",
+      "stage": "Two Way Conversation",
+      "stage_key": "two_way_conversation",
+      "value": 17600,
+      "timestamp": "2026-04-03T00:00:00Z"
+    },
+    {
+      "name": "Testing",
+      "full_name": "Testing - Artificial Turf Installation Project ",
+      "stage": "Quote Approved - Won",
+      "stage_key": "quote_approved",
+      "value": 10000,
+      "timestamp": "2026-04-03T00:00:00Z"
+    },
+    {
+      "name": "Johnson",
+      "full_name": "Johnson - Integration Test Quote",
+      "stage": "Quote Approved - Won",
+      "stage_key": "quote_approved",
+      "value": 1234,
+      "timestamp": "2026-04-02T00:00:00Z"
+    },
+    {
+      "name": "Johnson",
+      "full_name": "Johnson - Integration Test Quote",
+      "stage": "Quote Sent",
+      "stage_key": "quote_sent",
+      "value": 1234,
+      "timestamp": "2026-04-02T00:00:00Z"
+    },
+    {
+      "name": "Kelly Ocasio",
+      "full_name": "Kelly Ocasio",
+      "stage": "Site Evaluation",
+      "stage_key": "site_evaluation",
+      "value": 0,
+      "timestamp": "2026-04-01T00:00:00Z"
+    },
+    {
+      "name": "Terry Shen",
+      "full_name": "Terry Shen",
+      "stage": "Site Evaluation",
+      "stage_key": "site_evaluation",
+      "value": 0,
+      "timestamp": "2026-04-01T00:00:00Z"
+    },
+    {
+      "name": "Shawn Khan",
+      "full_name": "Shawn Khan",
+      "stage": "Site Evaluation",
+      "stage_key": "site_evaluation",
+      "value": 0,
+      "timestamp": "2026-03-31T00:00:00Z"
+    },
+    {
+      "name": "Sam Ehlinger",
+      "full_name": "Sam Ehlinger",
+      "stage": "Site Evaluation",
+      "stage_key": "site_evaluation",
+      "value": 0,
+      "timestamp": "2026-03-30T00:00:00Z"
+    },
+    {
+      "name": "Adrina Villa",
+      "full_name": "Adrina Villa",
+      "stage": "Site Evaluation",
+      "stage_key": "site_evaluation",
+      "value": 0,
+      "timestamp": "2026-03-30T00:00:00Z"
+    },
+    {
+      "name": "Kiran Kamboj",
+      "full_name": "Kiran Kamboj",
+      "stage": "Site Evaluation",
+      "stage_key": "site_evaluation",
+      "value": 0,
+      "timestamp": "2026-03-30T00:00:00Z"
+    },
+    {
+      "name": "James Valdovinos",
+      "full_name": "James Valdovinos",
+      "stage": "Site Evaluation",
+      "stage_key": "site_evaluation",
+      "value": 0,
+      "timestamp": "2026-03-30T00:00:00Z"
+    },
+    {
+      "name": "Jamie  Westfall",
+      "full_name": "Jamie  Westfall",
+      "stage": "Site Evaluation",
+      "stage_key": "site_evaluation",
+      "value": 0,
+      "timestamp": "2026-03-29T00:00:00Z"
+    },
+    {
+      "name": "Shane Lekwa",
+      "full_name": "Shane Lekwa",
+      "stage": "Lead",
+      "stage_key": "lead",
+      "value": 0,
+      "timestamp": "2026-03-28T00:00:00Z"
+    },
+    {
+      "name": "Evan Harrison",
+      "full_name": "Evan Harrison",
+      "stage": "Two Way Conversation",
+      "stage_key": "two_way_conversation",
+      "value": 0,
+      "timestamp": "2026-03-26T00:00:00Z"
+    },
+    {
+      "name": "Bambi Kaminski",
+      "full_name": "Bambi Kaminski",
+      "stage": "Site Evaluation",
+      "stage_key": "site_evaluation",
+      "value": 0,
+      "timestamp": "2026-03-25T00:00:00Z"
+    }
+  ]
 }
