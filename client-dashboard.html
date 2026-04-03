@@ -45,6 +45,8 @@
   .status-badge.offline { background:var(--red-dim); border-color:rgba(239,68,68,0.2); color:var(--red); }
   .status-dot { width:7px; height:7px; border-radius:50%; background:currentColor; animation:pulse 2s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 var(--accent-glow)} 50%{box-shadow:0 0 0 5px transparent} }
+  .sync-info { font-size:10px; color:var(--text3); text-align:right; line-height:1.4; }
+  .sync-time { color:var(--text2); font-weight:500; }
 
   /* Main */
   .main { padding:20px 32px 32px; max-width:1400px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
@@ -156,7 +158,7 @@
   .funnel-bar.won { background:var(--accent); }
   .funnel-label { font-size:12px; font-weight:600; color:var(--text2); width:55px; text-align:right; }
   .funnel-count { font-size:14px; font-weight:800; color:var(--text); width:35px; font-variant-numeric:tabular-nums; }
-  .funnel-arrow { text-align:center; font-size:10px; color:var(--text3); line-height:1; margin:-2px 0; }
+  .funnel-arrow { text-align:center; font-size:9px; color:var(--text3); line-height:1; margin:2px 0; letter-spacing:0.04em; }
   .funnel-rates { display:flex; gap:16px; margin-top:8px; padding-top:10px; border-top:1px solid var(--border); }
   .funnel-rate { font-size:11px; color:var(--text3); }
   .rate-val { font-weight:800; font-size:16px; color:var(--accent); margin-right:4px; }
@@ -210,6 +212,10 @@
     <div class="status-badge" id="statusBadge">
       <span class="status-dot"></span>
       <span id="statusText">Connecting...</span>
+    </div>
+    <div class="sync-info">
+      <div>Last sync: <span class="sync-time" id="lastSync">--</span></div>
+      <div>Auto-refresh every 5 min</div>
     </div>
   </div>
 </header>
@@ -270,7 +276,7 @@
           <div class="funnel-label">Leads</div>
           <div class="funnel-count" id="fLeadsCount">--</div>
         </div>
-        <div class="funnel-arrow">&#9660;</div>
+        <div class="funnel-arrow">&#9660; conversion</div>
         <div class="funnel-step">
           <div class="funnel-bar-wrap">
             <div class="funnel-bar quoted" id="fQuoted" style="width:0%"></div>
@@ -278,7 +284,7 @@
           <div class="funnel-label">Quoted</div>
           <div class="funnel-count" id="fQuotedCount">--</div>
         </div>
-        <div class="funnel-arrow">&#9660;</div>
+        <div class="funnel-arrow">&#9660; conversion</div>
         <div class="funnel-step">
           <div class="funnel-bar-wrap">
             <div class="funnel-bar won" id="fWon" style="width:0%"></div>
@@ -373,26 +379,36 @@
       job_complete: { count: 0, value: 0 }, closed_lost: { count: 0, value: 0 },
     };
 
-    // Try Modal endpoint first (live data)
+    let staticData = null;
+
+    // Always load static JSON as baseline
+    try {
+      const resp = await fetch('pipeline-data.json?_=' + Date.now());
+      if (resp.ok) staticData = await resp.json();
+    } catch(e) {
+      console.warn('Static pipeline data unavailable:', e);
+    }
+
+    // Try Modal endpoint for live data
     try {
       const resp = await fetch(PIPELINE_URL + '?client=' + CLIENT_SLUG + '&_=' + Date.now());
       if (resp.ok) {
         const pData = await resp.json();
+        // If Modal returns empty product_mix but static has data, use static's
+        if ((!pData.product_mix || pData.product_mix.length === 0) && staticData && staticData.product_mix && staticData.product_mix.length > 0) {
+          pData.product_mix = staticData.product_mix;
+        }
+        updateSyncTime();
         return applyPipelineData(pData, empty);
       }
     } catch(e) {
-      console.warn('Modal pipeline endpoint unavailable, trying static JSON:', e);
+      console.warn('Modal pipeline endpoint unavailable, using static JSON:', e);
     }
 
     // Fall back to static JSON
-    try {
-      const resp = await fetch('pipeline-data.json?_=' + Date.now());
-      if (resp.ok) {
-        const pData = await resp.json();
-        return applyPipelineData(pData, empty);
-      }
-    } catch(e) {
-      console.warn('Static pipeline data unavailable:', e);
+    if (staticData) {
+      updateSyncTime('static');
+      return applyPipelineData(staticData, empty);
     }
 
     // No data available
@@ -617,6 +633,13 @@
     if (hrs < 24) return hrs + 'h ago';
     const days = Math.floor(hrs / 24);
     return days + 'd ago';
+  }
+
+  // ── Update sync timestamp ──
+  function updateSyncTime(source) {
+    const el = document.getElementById('lastSync');
+    const now = new Date();
+    el.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + (source === 'static' ? ' (cached)' : '');
   }
 
   // ── Init ──
