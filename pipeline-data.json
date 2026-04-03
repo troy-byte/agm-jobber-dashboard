@@ -56,30 +56,6 @@
       "timestamp": "2026-04-03T00:00:00Z"
     },
     {
-      "name": "Testing",
-      "full_name": "Testing - Artificial Turf Installation Project ",
-      "stage": "Quote Approved - Won",
-      "stage_key": "quote_approved",
-      "value": 10000,
-      "timestamp": "2026-04-03T00:00:00Z"
-    },
-    {
-      "name": "Johnson",
-      "full_name": "Johnson - Integration Test Quote",
-      "stage": "Quote Approved - Won",
-      "stage_key": "quote_approved",
-      "value": 1234,
-      "timestamp": "2026-04-02T00:00:00Z"
-    },
-    {
-      "name": "Johnson",
-      "full_name": "Johnson - Integration Test Quote",
-      "stage": "Quote Sent",
-      "stage_key": "quote_sent",
-      "value": 1234,
-      "timestamp": "2026-04-02T00:00:00Z"
-    },
-    {
       "name": "Kelly Ocasio",
       "full_name": "Kelly Ocasio",
       "stage": "Site Evaluation",

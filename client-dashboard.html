@@ -658,7 +658,15 @@
       closed_lost:           { color: 'red',    action: 'Closed lost' },
     };
 
-    const events = recentActivity.map(item => {
+    // Filter out test/integration records client-side
+    const testWords = ['test', 'testing', 'integration test', 'demo', 'sample'];
+    const filtered = recentActivity.filter(item => {
+      const n = (item.name || '').toLowerCase();
+      const fn = (item.full_name || '').toLowerCase();
+      return !testWords.some(kw => n.includes(kw) || fn.includes(kw));
+    });
+
+    const events = filtered.map(item => {
       const style = stageStyle[item.stage_key] || { color: 'blue', action: item.stage };
       const name = item.name || 'Unknown';
       const valStr = item.value > 0 ? ' &mdash; <span class="feed-amount">$' + Math.round(item.value).toLocaleString() + '</span>' : '';
