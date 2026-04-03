@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Texas Turf Company — Client Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --bg-card: #111827;
+    --bg-hover: #1a2332;
+    --accent: #22c55e;
+    --accent-dim: rgba(34,197,94,0.15);
+    --accent-glow: rgba(34,197,94,0.3);
+    --jobber: #7c3aed;
+    --jobber-dim: rgba(124,58,237,0.15);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59,130,246,0.15);
+    --amber: #f59e0b;
+    --amber-dim: rgba(245,158,11,0.15);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.15);
+    --cyan: #06b6d4;
+    --cyan-dim: rgba(6,182,212,0.15);
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --border: rgba(255,255,255,0.06);
+    --border2: rgba(255,255,255,0.03);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  /* Header */
+  .header { display:flex; justify-content:space-between; align-items:center; padding:16px 32px; background:rgba(10,15,26,0.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+  .header-left { display:flex; align-items:center; gap:14px; }
+  .header-title { font-size:16px; font-weight:800; letter-spacing:-0.03em; line-height:1.1; }
+  .header-sub { font-size:10px; font-weight:500; color:var(--text3); letter-spacing:0.05em; text-transform:uppercase; }
+  .header-sub .jb { color:var(--jobber); font-weight:600; }
+  .header-right { display:flex; align-items:center; gap:20px; }
+  .client-name { font-size:13px; color:var(--text2); font-weight:500; }
+  .status-badge { display:flex; align-items:center; gap:7px; background:var(--accent-dim); border:1px solid rgba(34,197,94,0.2); padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600; color:var(--accent); letter-spacing:0.05em; text-transform:uppercase; }
+  .status-badge.degraded { background:var(--amber-dim); border-color:rgba(245,158,11,0.2); color:var(--amber); }
+  .status-badge.offline { background:var(--red-dim); border-color:rgba(239,68,68,0.2); color:var(--red); }
+  .status-dot { width:7px; height:7px; border-radius:50%; background:currentColor; animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 var(--accent-glow)} 50%{box-shadow:0 0 0 5px transparent} }
+
+  /* Main */
+  .main { padding:20px 32px 32px; max-width:1400px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+
+  /* Metrics Row */
+  .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .metric { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px 20px; position:relative; overflow:hidden; transition:border-color 0.3s; }
+  .metric:hover { border-color:rgba(255,255,255,0.1); }
+  .metric::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+  .metric:nth-child(1)::before { background:linear-gradient(90deg,var(--accent),transparent); }
+  .metric:nth-child(2)::before { background:linear-gradient(90deg,var(--jobber),transparent); }
+  .metric:nth-child(3)::before { background:linear-gradient(90deg,var(--blue),transparent); }
+  .metric:nth-child(4)::before { background:linear-gradient(90deg,var(--amber),transparent); }
+  .metric-label { font-size:11px; font-weight:500; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px; }
+  .metric-val { font-size:28px; font-weight:800; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; line-height:1; }
+  .metric:nth-child(1) .metric-val { color:var(--accent); }
+  .metric:nth-child(2) .metric-val { color:var(--jobber); }
+  .metric:nth-child(3) .metric-val { color:var(--blue); }
+  .metric:nth-child(4) .metric-val { color:var(--amber); }
+  .metric-sub { font-size:11px; color:var(--text3); margin-top:4px; }
+
+  /* Pipeline Section */
+  .section-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom:2px; }
+  .section-sub { font-size:11px; color:var(--text3); margin-bottom:12px; }
+
+  .pipeline-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+  .pipeline-funnel { display:flex; flex-direction:column; gap:6px; }
+  .stage { display:grid; grid-template-columns:180px 60px 1fr 80px; align-items:center; gap:12px; padding:8px 12px; border-radius:8px; transition:background 0.15s; }
+  .stage:hover { background:var(--border2); }
+  .stage-name { font-size:13px; font-weight:600; color:var(--text); display:flex; align-items:center; gap:8px; }
+  .stage-icon { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .stage-count { font-size:18px; font-weight:800; font-variant-numeric:tabular-nums; text-align:right; }
+  .stage-bar-track { height:6px; background:rgba(255,255,255,0.04); border-radius:3px; overflow:hidden; }
+  .stage-bar { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.16,1,0.3,1); width:0; }
+  .stage-value { font-size:12px; font-weight:600; color:var(--text2); text-align:right; font-variant-numeric:tabular-nums; }
+
+  /* Stage colors */
+  .stage[data-stage="lead"] .stage-icon, .stage[data-stage="lead"] .stage-bar { background:var(--blue); }
+  .stage[data-stage="lead"] .stage-count { color:var(--blue); }
+  .stage[data-stage="two_way_conversation"] .stage-icon, .stage[data-stage="two_way_conversation"] .stage-bar { background:var(--cyan); }
+  .stage[data-stage="two_way_conversation"] .stage-count { color:var(--cyan); }
+  .stage[data-stage="preliminary_quote"] .stage-icon, .stage[data-stage="preliminary_quote"] .stage-bar { background:#818cf8; }
+  .stage[data-stage="preliminary_quote"] .stage-count { color:#818cf8; }
+  .stage[data-stage="site_evaluation"] .stage-icon, .stage[data-stage="site_evaluation"] .stage-bar { background:var(--jobber); }
+  .stage[data-stage="site_evaluation"] .stage-count { color:var(--jobber); }
+  .stage[data-stage="design_preparation"] .stage-icon, .stage[data-stage="design_preparation"] .stage-bar { background:#a78bfa; }
+  .stage[data-stage="design_preparation"] .stage-count { color:#a78bfa; }
+  .stage[data-stage="quote_sent"] .stage-icon, .stage[data-stage="quote_sent"] .stage-bar { background:var(--amber); }
+  .stage[data-stage="quote_sent"] .stage-count { color:var(--amber); }
+  .stage[data-stage="negotiation"] .stage-icon, .stage[data-stage="negotiation"] .stage-bar { background:#fb923c; }
+  .stage[data-stage="negotiation"] .stage-count { color:#fb923c; }
+  .stage[data-stage="quote_approved"] .stage-icon, .stage[data-stage="quote_approved"] .stage-bar { background:var(--accent); }
+  .stage[data-stage="quote_approved"] .stage-count { color:var(--accent); }
+  .stage[data-stage="job_complete"] .stage-icon, .stage[data-stage="job_complete"] .stage-bar { background:#34d399; }
+  .stage[data-stage="job_complete"] .stage-count { color:#34d399; }
+  .stage[data-stage="closed_lost"] .stage-icon, .stage[data-stage="closed_lost"] .stage-bar { background:var(--red); }
+  .stage[data-stage="closed_lost"] .stage-count { color:var(--red); }
+
+  /* Middle Grid */
+  .mid-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  /* Activity Feed */
+  .card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
+  .card-head { display:flex; justify-content:space-between; align-items:center; padding:14px 18px 10px; }
+  .card-title { font-size:13px; font-weight:600; }
+  .badge { font-size:10px; font-weight:600; padding:3px 9px; border-radius:10px; text-transform:uppercase; letter-spacing:0.04em; }
+  .badge.live { background:var(--accent-dim); color:var(--accent); }
+  .badge.info { background:var(--blue-dim); color:var(--blue); }
+
+  .feed { padding:0 18px 14px; display:flex; flex-direction:column; gap:4px; max-height:320px; overflow-y:auto; }
+  .feed::-webkit-scrollbar { width:4px; }
+  .feed::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  .feed-item { display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:8px; background:var(--border2); transition:background 0.2s; }
+  .feed-item:hover { background:rgba(255,255,255,0.04); }
+  .feed-dot { width:6px; height:6px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+  .feed-dot.green { background:var(--accent); box-shadow:0 0 6px var(--accent-glow); }
+  .feed-dot.blue { background:var(--blue); box-shadow:0 0 6px rgba(59,130,246,0.3); }
+  .feed-dot.purple { background:var(--jobber); box-shadow:0 0 6px rgba(124,58,237,0.25); }
+  .feed-dot.amber { background:var(--amber); box-shadow:0 0 6px rgba(245,158,11,0.3); }
+  .feed-dot.red { background:var(--red); box-shadow:0 0 6px rgba(239,68,68,0.3); }
+  .feed-text { font-size:12px; color:var(--text2); line-height:1.4; flex:1; }
+  .feed-text strong { color:var(--text); font-weight:600; }
+  .feed-time { font-size:10px; color:var(--text3); white-space:nowrap; margin-top:2px; }
+  .feed-amount { color:var(--accent); font-weight:700; }
+
+  /* Automation & Health */
+  .health-grid { display:flex; flex-direction:column; gap:6px; padding:0 18px 14px; }
+  .health-row { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-radius:8px; background:var(--border2); }
+  .health-label { font-size:12px; color:var(--text2); }
+  .health-status { font-size:11px; font-weight:600; display:flex; align-items:center; gap:6px; }
+  .health-status.ok { color:var(--accent); }
+  .health-status.warn { color:var(--amber); }
+  .health-status.err { color:var(--red); }
+  .health-check { font-size:10px; }
+
+  /* Workflows */
+  .wf-list { padding:0 18px 14px; display:flex; flex-direction:column; gap:4px; }
+  .wf-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; background:var(--border2); font-size:12px; color:var(--text2); }
+  .wf-check { width:20px; height:20px; border-radius:6px; background:var(--accent-dim); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; }
+  .wf-arrow { color:var(--text3); margin:0 2px; }
+  .wf-pending .wf-check { background:var(--amber-dim); color:var(--amber); }
+
+  /* Footer */
+  .footer { text-align:center; font-size:11px; color:var(--text3); padding:20px 32px; border-top:1px solid var(--border); margin-top:8px; }
+  .footer a { color:var(--text2); text-decoration:none; }
+  .footer a:hover { color:var(--accent); }
+
+  /* Loading shimmer */
+  .shimmer { background:linear-gradient(90deg,var(--bg-card) 25%,var(--bg-hover) 50%,var(--bg-card) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  @media(max-width:900px) {
+    .metrics { grid-template-columns:repeat(2,1fr); }
+    .mid-grid { grid-template-columns:1fr; }
+    .stage { grid-template-columns:140px 50px 1fr 60px; }
+    .main { padding:16px; }
+    .header { padding:12px 16px; }
+  }
+  @media(max-width:600px) {
+    .metrics { grid-template-columns:1fr; }
+    .stage { grid-template-columns:120px 40px 1fr; }
+    .stage-value { display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div>
+      <div class="header-title">AGM Pro Tools</div>
+      <div class="header-sub">Powered by <span class="jb">Jobber</span></div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="client-name" id="clientName">Texas Turf Company</span>
+    <div class="status-badge" id="statusBadge">
+      <span class="status-dot"></span>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Metrics -->
+  <div class="metrics" id="metricsRow">
+    <div class="metric">
+      <div class="metric-label">Pipeline Value</div>
+      <div class="metric-val" id="mPipelineValue">--</div>
+      <div class="metric-sub">Active opportunities</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Open Quotes</div>
+      <div class="metric-val" id="mOpenQuotes">--</div>
+      <div class="metric-sub">Awaiting response</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Won This Month</div>
+      <div class="metric-val" id="mWonMonth">--</div>
+      <div class="metric-sub" id="mWonMonthSub">Quote approved</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Jobs Completed</div>
+      <div class="metric-val" id="mJobsComplete">--</div>
+      <div class="metric-sub">All time</div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="pipeline-card">
+    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px;">
+      <div>
+        <div class="section-title">Sales Pipeline</div>
+        <div class="section-sub">Residential Sales — 10 stages</div>
+      </div>
+      <div style="font-size:11px; color:var(--text3);" id="pipelineUpdated">Loading...</div>
+    </div>
+    <div class="pipeline-funnel" id="pipelineFunnel">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- Middle: Feed + Health -->
+  <div class="mid-grid">
+
+    <!-- Activity Feed -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Recent Activity</span>
+        <span class="badge live" id="feedBadge">Live</span>
+      </div>
+      <div class="feed" id="activityFeed">
+        <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
+        <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
+        <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
+      </div>
+    </div>
+
+    <!-- Integration Health + Workflows -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Integration Health</span>
+        <span class="badge info" id="healthBadge">Checking...</span>
+      </div>
+      <div class="health-grid" id="healthGrid">
+        <div class="health-row">
+          <span class="health-label">Jobber Connection</span>
+          <span class="health-status" id="hJobber"><span class="health-check">...</span></span>
+        </div>
+        <div class="health-row">
+          <span class="health-label">AGM Connection</span>
+          <span class="health-status" id="hGHL"><span class="health-check">...</span></span>
+        </div>
+        <div class="health-row">
+          <span class="health-label">Retry Queue</span>
+          <span class="health-status" id="hRetry"><span class="health-check">...</span></span>
+        </div>
+        <div class="health-row">
+          <span class="health-label">Last Sync Event</span>
+          <span class="health-status" id="hLastSync"><span class="health-check">...</span></span>
+        </div>
+      </div>
+
+      <div class="card-head" style="border-top:1px solid var(--border); margin-top:4px;">
+        <span class="card-title">Active Workflows</span>
+        <span class="badge live">4 Live</span>
+      </div>
+      <div class="wf-list">
+        <div class="wf-item">
+          <span class="wf-check">&#10003;</span>
+          WF1: Lead tagged <span class="wf-arrow">&rarr;</span> Create Jobber client
+        </div>
+        <div class="wf-item">
+          <span class="wf-check">&#10003;</span>
+          WF2: Quote sent <span class="wf-arrow">&rarr;</span> Pipeline update
+        </div>
+        <div class="wf-item">
+          <span class="wf-check">&#10003;</span>
+          WF3: Quote approved <span class="wf-arrow">&rarr;</span> Won + line items
+        </div>
+        <div class="wf-item">
+          <span class="wf-check">&#10003;</span>
+          WF4: Job complete <span class="wf-arrow">&rarr;</span> Review request
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<footer class="footer">
+  Powered by <a href="https://agmprotools.com" target="_blank">AGM Pro Tools</a> &mdash; Automated FSM Intelligence
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Configuration ──
+  // Template variables — swap these per client
+  const CLIENT_SLUG = 'texas-turf';
+  const CLIENT_NAME = 'Texas Turf Company';
+  const HEALTH_URL = 'https://agm-pro--agm-health-health.modal.run';
+
+  const PIPELINE_STAGES = [
+    { key: 'lead',                  name: 'Lead',                  id: 'e8e6bfc4-06b9-471a-a09c-516f5d435c30' },
+    { key: 'two_way_conversation',  name: 'Two Way Conversation',  id: '2515486c-6da1-4655-8b01-3eaeac8c2977' },
+    { key: 'preliminary_quote',     name: 'Preliminary Quote',     id: '01f3f8c8-5fa0-4260-9781-c3e4d749ff14' },
+    { key: 'site_evaluation',       name: 'Site Evaluation',       id: 'd152dfed-781d-4b00-868e-26c513e934f1' },
+    { key: 'design_preparation',    name: 'Design Preparation',    id: 'd0babb76-cba9-465b-8e1b-2c1f5b763a9a' },
+    { key: 'quote_sent',            name: 'Quote Sent',            id: '061e2e51-84c0-48d7-a0b1-8b460b038a51' },
+    { key: 'negotiation',           name: 'Negotiation',           id: '3493d150-da41-4278-a5b1-e962f45d1676' },
+    { key: 'quote_approved',        name: 'Quote Approved',        id: 'ec163aa6-e70d-42e2-af88-c398c018ffaa' },
+    { key: 'job_complete',          name: 'Job Complete',           id: 'ad716081-9dc3-4b7f-9614-fe25be0f4d72' },
+    { key: 'closed_lost',           name: 'Closed Lost',           id: '92686ed1-4f1e-4e1f-829c-d075e8d2f2f9' },
+  ];
+
+  // ── Health endpoint fetch ──
+  async function fetchHealth() {
+    try {
+      const resp = await fetch(HEALTH_URL + '?_=' + Date.now());
+      if (!resp.ok) throw new Error('Health endpoint ' + resp.status);
+      const data = await resp.json();
+      return data;
+    } catch (e) {
+      console.error('Health fetch failed:', e);
+      return null;
+    }
+  }
+
+  // ── Update status badge ──
+  function updateStatus(health) {
+    const badge = document.getElementById('statusBadge');
+    const text = document.getElementById('statusText');
+    if (!health) {
+      badge.className = 'status-badge offline';
+      text.textContent = 'Offline';
+      return;
+    }
+    const client = health.clients ? health.clients[CLIENT_SLUG] : null;
+    if (!client || client.status === 'unhealthy') {
+      badge.className = 'status-badge offline';
+      text.textContent = 'Disconnected';
+    } else if (client.status === 'degraded') {
+      badge.className = 'status-badge degraded';
+      text.textContent = 'Degraded';
+    } else {
+      badge.className = 'status-badge';
+      text.textContent = 'Connected';
+    }
+  }
+
+  // ── Update health panel ──
+  function updateHealthPanel(health) {
+    const client = health && health.clients ? health.clients[CLIENT_SLUG] : null;
+    const hBadge = document.getElementById('healthBadge');
+
+    if (!client) {
+      hBadge.textContent = 'Unavailable';
+      hBadge.className = 'badge';
+      hBadge.style.background = 'var(--red-dim)';
+      hBadge.style.color = 'var(--red)';
+      return;
+    }
+
+    // Jobber connection
+    const hJobber = document.getElementById('hJobber');
+    if (client.token_valid) {
+      hJobber.className = 'health-status ok';
+      const mins = Math.round(client.token_expires_in_minutes || 0);
+      hJobber.innerHTML = '<span class="health-check">&#10003;</span> Token valid (' + mins + 'm)';
+    } else {
+      hJobber.className = 'health-status err';
+      hJobber.innerHTML = '<span class="health-check">&#10007;</span> Token expired';
+    }
+
+    // GHL connection — infer from overall status
+    const hGHL = document.getElementById('hGHL');
+    if (client.status === 'healthy') {
+      hGHL.className = 'health-status ok';
+      hGHL.innerHTML = '<span class="health-check">&#10003;</span> Connected';
+    } else {
+      hGHL.className = 'health-status warn';
+      hGHL.innerHTML = '<span class="health-check">&#9888;</span> Check needed';
+    }
+
+    // Retry queue
+    const hRetry = document.getElementById('hRetry');
+    const pending = client.pending_retries || 0;
+    const dead = client.dead_retries || 0;
+    if (pending === 0 && dead === 0) {
+      hRetry.className = 'health-status ok';
+      hRetry.innerHTML = '<span class="health-check">&#10003;</span> Clear';
+    } else if (dead > 0) {
+      hRetry.className = 'health-status err';
+      hRetry.innerHTML = '<span class="health-check">&#10007;</span> ' + dead + ' dead, ' + pending + ' pending';
+    } else {
+      hRetry.className = 'health-status warn';
+      hRetry.innerHTML = '<span class="health-check">&#9888;</span> ' + pending + ' pending';
+    }
+
+    // Last sync
+    const hLastSync = document.getElementById('hLastSync');
+    if (client.last_event_at) {
+      const ago = timeAgo(new Date(client.last_event_at));
+      hLastSync.className = 'health-status ok';
+      hLastSync.innerHTML = '<span class="health-check">&#10003;</span> ' + ago;
+    } else {
+      hLastSync.className = 'health-status warn';
+      hLastSync.innerHTML = '<span class="health-check">&#9888;</span> No events yet';
+    }
+
+    // Update badge
+    if (client.status === 'healthy') {
+      hBadge.textContent = 'All Systems Go';
+      hBadge.className = 'badge live';
+    } else if (client.status === 'degraded') {
+      hBadge.textContent = 'Degraded';
+      hBadge.className = 'badge';
+      hBadge.style.background = 'var(--amber-dim)';
+      hBadge.style.color = 'var(--amber)';
+    } else {
+      hBadge.textContent = 'Issues Detected';
+      hBadge.className = 'badge';
+      hBadge.style.background = 'var(--red-dim)';
+      hBadge.style.color = 'var(--red)';
+    }
+
+    // Update metrics from health data
+    const eventsToday = client.injections_today || 0;
+    const eventsWeek = client.injections_this_week || 0;
+    const eventsMonth = client.injections_this_month || 0;
+    const totalEvents = client.processed_events_count || 0;
+
+    // Use health data for what we can
+    document.getElementById('mJobsComplete').textContent = totalEvents.toLocaleString();
+    document.getElementById('mJobsComplete').closest('.metric').querySelector('.metric-sub').textContent = 'Total events processed';
+    document.getElementById('mWonMonth').textContent = eventsMonth.toLocaleString();
+    document.getElementById('mWonMonthSub').textContent = eventsWeek + ' this week, ' + eventsToday + ' today';
+    document.getElementById('mWonMonth').closest('.metric').querySelector('.metric-label').textContent = 'Events This Month';
+  }
+
+  // ── Build pipeline (static for now — will wire to GHL API) ──
+  function buildPipeline(pipelineData) {
+    const funnel = document.getElementById('pipelineFunnel');
+    const maxCount = Math.max(...PIPELINE_STAGES.map(s => {
+      const d = pipelineData ? pipelineData[s.key] : null;
+      return d ? d.count : 0;
+    }), 1);
+
+    funnel.innerHTML = PIPELINE_STAGES.map(s => {
+      const d = pipelineData ? pipelineData[s.key] : { count: 0, value: 0 };
+      const count = d.count || 0;
+      const value = d.value || 0;
+      const pct = maxCount > 0 ? (count / maxCount * 100) : 0;
+      const valStr = value > 0 ? '$' + value.toLocaleString() : '--';
+
+      return '<div class="stage" data-stage="' + s.key + '">' +
+        '<div class="stage-name"><span class="stage-icon"></span>' + s.name + '</div>' +
+        '<div class="stage-count">' + count + '</div>' +
+        '<div class="stage-bar-track"><div class="stage-bar" data-pct="' + pct + '"></div></div>' +
+        '<div class="stage-value">' + valStr + '</div>' +
+      '</div>';
+    }).join('');
+
+    // Animate bars
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        funnel.querySelectorAll('.stage-bar').forEach(bar => {
+          bar.style.width = bar.dataset.pct + '%';
+        });
+      }, 100);
+    });
+
+    document.getElementById('pipelineUpdated').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+  }
+
+  // ── Build activity feed from health + sample events ──
+  function buildActivityFeed(health) {
+    const feed = document.getElementById('activityFeed');
+    const client = health && health.clients ? health.clients[CLIENT_SLUG] : null;
+
+    // Build events from what we know
+    const events = [];
+
+    if (client) {
+      if (client.last_event_at) {
+        events.push({ color: 'green', text: '<strong>Last sync event</strong> processed successfully', time: timeAgo(new Date(client.last_event_at)) });
+      }
+      if (client.injections_today > 0) {
+        events.push({ color: 'blue', text: '<strong>' + client.injections_today + ' events</strong> synced today', time: 'Today' });
+      }
+      if (client.injections_this_week > 0) {
+        events.push({ color: 'purple', text: '<strong>' + client.injections_this_week + ' events</strong> this week', time: 'This week' });
+      }
+      if (client.pending_retries > 0) {
+        events.push({ color: 'amber', text: '<strong>' + client.pending_retries + ' events</strong> pending retry', time: 'Queue' });
+      }
+      if (client.dead_retries > 0) {
+        events.push({ color: 'red', text: '<strong>' + client.dead_retries + ' events</strong> in dead letter queue', time: 'Needs attention' });
+      }
+      if (client.token_valid) {
+        const mins = Math.round(client.token_expires_in_minutes || 0);
+        events.push({ color: 'green', text: '<strong>Jobber token</strong> valid — refreshes in ' + mins + ' min', time: 'Active' });
+      }
+    }
+
+    // Integration workflow confirmations
+    events.push({ color: 'green', text: '<strong>WF1</strong> Lead tag &rarr; Jobber client creation', time: 'Active' });
+    events.push({ color: 'green', text: '<strong>WF2</strong> Quote Sent &rarr; Pipeline + follow-up', time: 'Active' });
+    events.push({ color: 'green', text: '<strong>WF3</strong> Quote Approved &rarr; Won + turf data', time: 'Active' });
+    events.push({ color: 'green', text: '<strong>WF4</strong> Job Complete &rarr; Review request', time: 'Active' });
+
+    if (events.length === 0) {
+      events.push({ color: 'amber', text: 'No activity data available', time: '--' });
+    }
+
+    feed.innerHTML = events.map(ev =>
+      '<div class="feed-item">' +
+        '<span class="feed-dot ' + ev.color + '"></span>' +
+        '<span class="feed-text">' + ev.text + '</span>' +
+        '<span class="feed-time">' + ev.time + '</span>' +
+      '</div>'
+    ).join('');
+  }
+
+  // ── Time ago helper ──
+  function timeAgo(date) {
+    const secs = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (secs < 60) return secs + 's ago';
+    const mins = Math.floor(secs / 60);
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    return days + 'd ago';
+  }
+
+  // ── Init ──
+  async function init() {
+    document.getElementById('clientName').textContent = CLIENT_NAME;
+
+    // Fetch health data
+    const health = await fetchHealth();
+    updateStatus(health);
+    updateHealthPanel(health);
+    buildActivityFeed(health);
+
+    // Pipeline — start with placeholder counts, will wire to GHL API
+    // For now show structure. Real data requires server-side GHL API call.
+    const pipelineData = {
+      lead: { count: 0, value: 0 },
+      two_way_conversation: { count: 0, value: 0 },
+      preliminary_quote: { count: 0, value: 0 },
+      site_evaluation: { count: 0, value: 0 },
+      design_preparation: { count: 0, value: 0 },
+      quote_sent: { count: 0, value: 0 },
+      negotiation: { count: 0, value: 0 },
+      quote_approved: { count: 0, value: 0 },
+      job_complete: { count: 0, value: 0 },
+      closed_lost: { count: 0, value: 0 },
+    };
+
+    // Try to get pipeline data if we have a data endpoint
+    try {
+      const pResp = await fetch('pipeline-data.json?_=' + Date.now());
+      if (pResp.ok) {
+        const pData = await pResp.json();
+        if (pData.stages) {
+          Object.keys(pData.stages).forEach(k => {
+            if (pipelineData[k] !== undefined) {
+              pipelineData[k] = pData.stages[k];
+            }
+          });
+        }
+        // Update top metrics from pipeline data
+        if (pData.total_pipeline_value) {
+          document.getElementById('mPipelineValue').textContent = '$' + pData.total_pipeline_value.toLocaleString();
+        }
+        if (pData.open_quotes !== undefined) {
+          document.getElementById('mOpenQuotes').textContent = pData.open_quotes.toLocaleString();
+        }
+      }
+    } catch(e) {
+      // Pipeline data file not available yet — that's fine
+      document.getElementById('mPipelineValue').textContent = '--';
+      document.getElementById('mOpenQuotes').textContent = '--';
+    }
+
+    buildPipeline(pipelineData);
+  }
+
+  // Run
+  init();
+
+  // Auto-refresh every 5 minutes
+  setInterval(() => {
+    fetchHealth().then(health => {
+      updateStatus(health);
+      updateHealthPanel(health);
+      buildActivityFeed(health);
+    });
+  }, 5 * 60 * 1000);
+
+})();
+</script>
+
+</body>
+</html>
