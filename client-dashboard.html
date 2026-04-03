@@ -106,8 +106,8 @@
   .p-stage-context .rate { color:var(--accent); font-weight:600; }
   .p-stage-value { font-size:13px; font-weight:700; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; flex-shrink:0; min-width:80px; }
 
-  /* Middle Grid — 3 panels */
-  .tri-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+  /* Middle Grid — 2 panels (compact) */
+  .duo-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
   /* Activity Feed */
   .card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
@@ -117,7 +117,7 @@
   .badge.live { background:var(--accent-dim); color:var(--accent); }
   .badge.info { background:var(--blue-dim); color:var(--blue); }
 
-  .feed-container { flex:1; overflow:hidden; position:relative; padding:0 18px; }
+  .feed-container { flex:1; overflow:hidden; position:relative; padding:0 18px; max-height:220px; }
   .feed-container::after { content:''; position:absolute; bottom:0; left:0; right:0; height:40px; background:linear-gradient(transparent, var(--bg-card)); pointer-events:none; z-index:2; }
   .feed-track { display:flex; flex-direction:column; gap:4px; animation:feed-scroll 30s linear infinite; }
   @keyframes feed-scroll { 0%{transform:translateY(0)} 100%{transform:translateY(-50%)} }
@@ -173,7 +173,7 @@
 
   @media(max-width:900px) {
     .metrics { grid-template-columns:repeat(2,1fr); }
-    .tri-grid { grid-template-columns:1fr; }
+    .duo-grid { grid-template-columns:1fr; }
     .sub-header { flex-direction:column; gap:10px; align-items:flex-start; }
     .main { padding:16px; }
     .header { padding:12px 16px; }
@@ -258,8 +258,8 @@
     </div>
   </div>
 
-  <!-- Middle: 3-panel row -->
-  <div class="tri-grid">
+  <!-- Activity + Funnel (compact row) -->
+  <div class="duo-grid">
 
     <!-- Recent Activity -->
     <div class="card">
@@ -313,17 +313,17 @@
       </div>
     </div>
 
-    <!-- Product Mix -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-title">Product Mix</span>
-        <span class="badge info">Turf Types</span>
-      </div>
-      <div class="product-body" id="productBody">
-        <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
-      </div>
-    </div>
+  </div>
 
+  <!-- Product Mix — full width -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Product Mix</span>
+      <span class="badge info">Turf Types</span>
+    </div>
+    <div class="product-body" id="productBody">
+      <div class="feed-item shimmer" style="height:36px; border-radius:8px;">&nbsp;</div>
+    </div>
   </div>
 
 </main>
@@ -373,13 +373,13 @@
   }
 
   // ── Fetch pipeline data ──
-  async function fetchPipelineData() {
+  async function fetchPipelineData(dateRange) {
     const empty = {};
     PIPELINE_STAGES.forEach(s => { empty[s.key] = { count: 0, value: 0 }; });
 
     let staticData = null;
 
-    // Always load static JSON as baseline
+    // Always load static JSON as baseline (no date filtering for static)
     try {
       const resp = await fetch('pipeline-data.json?_=' + Date.now());
       if (resp.ok) staticData = await resp.json();
@@ -387,9 +387,14 @@
       console.warn('Static pipeline data unavailable:', e);
     }
 
+    // Build Modal URL with optional date range
+    let modalUrl = PIPELINE_URL + '?client=' + CLIENT_SLUG + '&_=' + Date.now();
+    if (dateRange && dateRange.from) modalUrl += '&from=' + dateRange.from;
+    if (dateRange && dateRange.to) modalUrl += '&to=' + dateRange.to;
+
     // Try Modal endpoint for live data
     try {
-      const resp = await fetch(PIPELINE_URL + '?client=' + CLIENT_SLUG + '&_=' + Date.now());
+      const resp = await fetch(modalUrl);
       if (resp.ok) {
         const pData = await resp.json();
         if ((!pData.product_mix || pData.product_mix.length === 0) && staticData && staticData.product_mix && staticData.product_mix.length > 0) {
@@ -668,13 +673,31 @@
     return days + 'd ago';
   }
 
+  // ── Date range calculator ──
+  function getDateRange(range) {
+    const now = new Date();
+    const pad = d => d.toISOString().slice(0, 10); // YYYY-MM-DD
+    switch (range) {
+      case '7d':  { const d = new Date(now); d.setDate(d.getDate() - 7); return { from: pad(d), to: pad(now) }; }
+      case '30d': { const d = new Date(now); d.setDate(d.getDate() - 30); return { from: pad(d), to: pad(now) }; }
+      case 'q1':  return { from: now.getFullYear() + '-01-01', to: now.getFullYear() + '-03-31' };
+      case 'ytd': return { from: now.getFullYear() + '-01-01', to: pad(now) };
+      default:    return {}; // all time — no filter
+    }
+  }
+
+  let activeRange = 'all';
+
   // ── Time filter buttons ──
   document.querySelectorAll('.time-filter').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', async function() {
       document.querySelectorAll('.time-filter').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
-      // Time filtering will be wired to backend date ranges
-      // For now, all filters show current data (All Time snapshot)
+      activeRange = this.dataset.range;
+      // Re-fetch with date range
+      const pipelineData = await fetchPipelineData(getDateRange(activeRange));
+      buildPipeline(pipelineData);
+      buildActivityFeed(lastRecentActivity);
     });
   });
 
@@ -696,7 +719,7 @@
   setInterval(async () => {
     const health = await fetchHealth();
     updateStatus(health);
-    const pData = await fetchPipelineData();
+    const pData = await fetchPipelineData(getDateRange(activeRange));
     buildPipeline(pData);
     buildActivityFeed(lastRecentActivity);
   }, 5 * 60 * 1000);
